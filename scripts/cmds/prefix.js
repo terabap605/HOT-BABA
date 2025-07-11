@@ -1,116 +1,133 @@
 const fs = require("fs-extra");
+const path = require("path");
+const axios = require("axios");
 const { utils } = global;
 
+const VIDEO_IDS = [
+  "1-WKsuSsLsO8BKc2Oil0KAxvgcwcsFTA3",
+  "1-8VSzbLm7c2eBesp8YwwvJxdhs0dcFSL",
+  "102gwONoMStLZxNUuRH7SQ0j8mmwoGMg6",
+  "10QycYgsTagrN90cWJCIWWVwmps2kk_oF"
+];
+
 module.exports = {
-        config: {
-                name: "prefix",
-                version: "1.5",
-                author: " BaYjid",
-                countDown: 5,
-                role: 0,
-                description: "🛠️ 𝐂𝐡𝐚𝐧𝐠𝐞 𝐭𝐡𝐞 𝐛𝐨𝐭 𝐩𝐫𝐞𝐟𝐢𝐱 𝐢𝐧 𝐲𝐨𝐮𝐫 𝐜𝐡𝐚𝐭 𝐛𝐨𝐱 𝐨𝐫 𝐭𝐡𝐞 𝐞𝐧𝐭𝐢𝐫𝐞 𝐬𝐲𝐬𝐭𝐞𝐦 (𝐨𝐧𝐥𝐲 𝐛𝐨𝐭 𝐚𝐝𝐦𝐢𝐧)",
-                category: "⚙️ 𝐂𝐨𝐧𝐟𝐢𝐠𝐮𝐫𝐚𝐭𝐢𝐨𝐧",
-                guide: {
-                        en: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "📌 {pn} <new prefix>: 𝐂𝐡𝐚𝐧𝐠𝐞 𝐭𝐡𝐞 𝐩𝐫𝐞𝐟𝐢𝐱 𝐢𝐧 𝐲𝐨𝐮𝐫 𝐜𝐡𝐚𝐭 𝐛𝐨𝐱\n"
-                                + "━━━━━━━━━━━━━━━━━━━\n"
-                                + "📍 𝐄𝐱𝐚𝐦𝐩𝐥𝐞:\n"
-                                + "🔹 {pn} #\n"
-                                + "━━━━━━━━━━━━━━━━━━━\n"
-                                + "📌 {pn} <new prefix> -g: 𝐂𝐡𝐚𝐧𝐠𝐞 𝐭𝐡𝐞 𝐩𝐫𝐞𝐟𝐢𝐱 𝐢𝐧 𝐭𝐡𝐞 𝐞𝐧𝐭𝐢𝐫𝐞 𝐬𝐲𝐬𝐭𝐞𝐦 (𝐨𝐧𝐥𝐲 𝐛𝐨𝐭 𝐚𝐝𝐦𝐢𝐧)\n"
-                                + "━━━━━━━━━━━━━━━━━━━\n"
-                                + "📍 𝐄𝐱𝐚𝐦𝐩𝐥𝐞:\n"
-                                + "🔹 {pn} # -g\n"
-                                + "━━━━━━━━━━━━━━━━━━━\n"
-                                + "🛠️ {pn} reset: 𝐑𝐞𝐬𝐞𝐭 𝐲𝐨𝐮𝐫 𝐜𝐡𝐚𝐭 𝐛𝐨𝐱 𝐩𝐫𝐞𝐟𝐢𝐱 𝐭𝐨 𝐝𝐞𝐟𝐚𝐮𝐥𝐭\n"
-                                + "━━━━━━━━━━━━━━━━━━━"
-                }
-        },
+  config: {
+    name: "prefix",
+    version: "2.0",
+    author: "BaYjid + Rahad",
+    countDown: 5,
+    role: 0,
+    description: "🛠️ Change bot prefix or show it with a video",
+    category: "⚙️ Configuration",
+    guide: {
+      en:
+        "━━━━━━━━━━━━━━━━━━━\n"
+        + "📌 {pn} <new prefix>: Change your group prefix\n"
+        + "📌 {pn} <new prefix> -g: Change global prefix (admin only)\n"
+        + "🛠️ {pn} reset: Reset to default prefix\n"
+        + "💬 Type \"prefix\" to view current prefix + video\n"
+        + "━━━━━━━━━━━━━━━━━━━"
+    }
+  },
 
-        langs: {
-                en: {
-                        reset: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "✅ 𝐘𝐨𝐮𝐫 𝐩𝐫𝐞𝐟𝐢𝐱 𝐡𝐚𝐬 𝐛𝐞𝐞𝐧 𝐫𝐞𝐬𝐞𝐭 𝐭𝐨 𝐝𝐞𝐟𝐚𝐮𝐥𝐭: %1\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        onlyAdmin: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "⚠️ 𝐎𝐧𝐥𝐲 𝐚𝐝𝐦𝐢𝐧 𝐜𝐚𝐧 𝐜𝐡𝐚𝐧𝐠𝐞 𝐭𝐡𝐞 𝐬𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱!\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        confirmGlobal: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "🔄 𝐏𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐚𝐜𝐭 𝐭𝐨 𝐭𝐡𝐢𝐬 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐭𝐨 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐜𝐡𝐚𝐧𝐠𝐢𝐧𝐠 𝐭𝐡𝐞 𝐬𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱.\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        confirmThisThread: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "🔄 𝐏𝐥𝐞𝐚𝐬𝐞 𝐫𝐞𝐚𝐜𝐭 𝐭𝐨 𝐭𝐡𝐢𝐬 𝐦𝐞𝐬𝐬𝐚𝐠𝐞 𝐭𝐨 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐜𝐡𝐚𝐧𝐠𝐢𝐧𝐠 𝐭𝐡𝐞 𝐩𝐫𝐞𝐟𝐢𝐱 𝐢𝐧 𝐲𝐨𝐮𝐫 𝐜𝐡𝐚𝐭 𝐠𝐫𝐨𝐮𝐩.\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        successGlobal: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "✅ 𝐒𝐲𝐬𝐭𝐞𝐦 𝐩𝐫𝐞𝐟𝐢𝐱 𝐡𝐚𝐬 𝐛𝐞𝐞𝐧 𝐜𝐡𝐚𝐧𝐠𝐞𝐝 𝐭𝐨: %1\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        successThisThread: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "✅ 𝐂𝐡𝐚𝐭 𝐠𝐫𝐨𝐮𝐩 𝐩𝐫𝐞𝐟𝐢𝐱 𝐡𝐚𝐬 𝐛𝐞𝐞𝐧 𝐜𝐡𝐚𝐧𝐠𝐞𝐝 𝐭𝐨: %1\n"
-                                + "━━━━━━━━━━━━━━━━━━━",
-                        myPrefix: 
-                                "━━━━━━━━━━━━━━━━━━━\n"
-                                + "🌍 𝐒𝐲𝐬𝐭𝐞𝐦 𝐏𝐫𝐞𝐟𝐢𝐱: %1\n"
-                                + "💬 𝐘𝐨𝐮𝐫 𝐆𝐫𝐨𝐮𝐩 𝐏𝐫𝐞𝐟𝐢𝐱: %2\n"
-                                + "⏰ 𝐒𝐞𝐫𝐯𝐞𝐫 𝐓𝐢𝐦𝐞: %3\n"
-                                + "━━━━━━━━━━━━━━━━━━━\n"
-                                + "💡 𝐓𝐨 𝐮𝐬𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐬, 𝐭𝐲𝐩𝐞 ➜ %2help 𝐭𝐨 𝐬𝐞𝐞 𝐚𝐯𝐚𝐢𝐥𝐚𝐛𝐥𝐞 𝐜𝐨𝐦𝐦𝐚𝐧𝐝𝐬!\n"
-                                + "━━━━━━━━━━━━━━━━━━━"
-                }
-        },
+  langs: {
+    en: {
+      reset:
+        "━━━━━━━━━━━━━━━━━━━\n✅ Prefix reset to default: %1\n━━━━━━━━━━━━━━━━━━━",
+      onlyAdmin:
+        "━━━━━━━━━━━━━━━━━━━\n⚠️ Only bot admins can change global prefix!\n━━━━━━━━━━━━━━━━━━━",
+      confirmGlobal:
+        "━━━━━━━━━━━━━━━━━━━\n🔄 React to confirm GLOBAL prefix change.\n━━━━━━━━━━━━━━━━━━━",
+      confirmThisThread:
+        "━━━━━━━━━━━━━━━━━━━\n🔄 React to confirm GROUP prefix change.\n━━━━━━━━━━━━━━━━━━━",
+      successGlobal:
+        "━━━━━━━━━━━━━━━━━━━\n✅ Global prefix changed to: %1\n━━━━━━━━━━━━━━━━━━━",
+      successThisThread:
+        "━━━━━━━━━━━━━━━━━━━\n✅ Group prefix changed to: %1\n━━━━━━━━━━━━━━━━━━━",
+      myPrefix:
+        "━━━━━━━━━━━━━━━━━━━\n"
+        + "🌍 Global Prefix: %1\n"
+        + "💬 Group Prefix: %2\n"
+        + "⏰ Server Time: %3\n"
+        + "━━━━━━━━━━━━━━━━━━━\n"
+        + "💡 Type ➜ %2help to view commands!\n"
+        + "━━━━━━━━━━━━━━━━━━━"
+    }
+  },
 
-        onStart: async function ({ message, role, args, commandName, event, threadsData, getLang }) {
-                if (!args[0]) return message.SyntaxError();
+  onStart: async function ({ message, role, args, commandName, event, threadsData, getLang }) {
+    if (!args[0]) return message.SyntaxError();
 
-                if (args[0] === "reset") {
-                        await threadsData.set(event.threadID, null, "data.prefix");
-                        return message.reply(getLang("reset", global.GoatBot.config.prefix));
-                }
+    if (args[0] === "reset") {
+      await threadsData.set(event.threadID, null, "data.prefix");
+      return message.reply(getLang("reset", global.GoatBot.config.prefix));
+    }
 
-                const newPrefix = args[0];
-                const formSet = {
-                        commandName,
-                        author: event.senderID,
-                        newPrefix,
-                        setGlobal: args[1] === "-g"
-                };
+    const newPrefix = args[0];
+    const formSet = {
+      commandName,
+      author: event.senderID,
+      newPrefix,
+      setGlobal: args[1] === "-g"
+    };
 
-                if (formSet.setGlobal && role < 2) {
-                        return message.reply(getLang("onlyAdmin"));
-                }
+    if (formSet.setGlobal && role < 2) {
+      return message.reply(getLang("onlyAdmin"));
+    }
 
-                const confirmMessage = formSet.setGlobal ? getLang("confirmGlobal") : getLang("confirmThisThread");
-                return message.reply(confirmMessage, (err, info) => {
-                        formSet.messageID = info.messageID;
-                        global.GoatBot.onReaction.set(info.messageID, formSet);
-                });
-        },
+    const confirmMessage = formSet.setGlobal ? getLang("confirmGlobal") : getLang("confirmThisThread");
+    return message.reply(confirmMessage, (err, info) => {
+      if (info?.messageID) {
+        formSet.messageID = info.messageID;
+        global.GoatBot.onReaction.set(info.messageID, formSet);
+      }
+    });
+  },
 
-        onReaction: async function ({ message, threadsData, event, Reaction, getLang }) {
-                const { author, newPrefix, setGlobal } = Reaction;
-                if (event.userID !== author) return;
+  onReaction: async function ({ message, threadsData, event, Reaction, getLang }) {
+    const { author, newPrefix, setGlobal } = Reaction;
+    if (event.userID !== author) return;
 
-                if (setGlobal) {
-                        global.GoatBot.config.prefix = newPrefix;
-                        fs.writeFileSync(global.client.dirConfig, JSON.stringify(global.GoatBot.config, null, 2));
-                        return message.reply(getLang("successGlobal", newPrefix));
-                }
+    if (setGlobal) {
+      global.GoatBot.config.prefix = newPrefix;
+      fs.writeFileSync(global.client.dirConfig, JSON.stringify(global.GoatBot.config, null, 2));
+      return message.reply(getLang("successGlobal", newPrefix));
+    }
 
-                await threadsData.set(event.threadID, newPrefix, "data.prefix");
-                return message.reply(getLang("successThisThread", newPrefix));
-        },
+    await threadsData.set(event.threadID, newPrefix, "data.prefix");
+    return message.reply(getLang("successThisThread", newPrefix));
+  },
 
-        onChat: async function ({ event, message, getLang }) {
-                if (event.body && event.body.toLowerCase() === "prefix") {
-                        const serverTime = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" }); 
+  onChat: async function ({ event, message, getLang, threadsData }) {
+    if (event.body?.toLowerCase()?.trim() !== "prefix") return;
 
-                        return message.reply(getLang("myPrefix", global.GoatBot.config.prefix, utils.getPrefix(event.threadID), serverTime));
-                }
-        }
+    const threadData = await threadsData.get(event.threadID);
+    const prefix = utils.getPrefix(event.threadID);
+    const time = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+
+    const info = getLang("myPrefix", global.GoatBot.config.prefix, prefix, time);
+
+    // Random video
+    const randomID = VIDEO_IDS[Math.floor(Math.random() * VIDEO_IDS.length)];
+    const videoURL = `https://drive.google.com/uc?export=download&id=${randomID}`;
+    const videoPath = path.join(__dirname, `temp_${Date.now()}.mp4`);
+
+    try {
+      const res = await axios({ method: "GET", url: videoURL, responseType: "stream" });
+      const writer = fs.createWriteStream(videoPath);
+      res.data.pipe(writer);
+
+      writer.on("finish", () => {
+        message.reply({ body: info, attachment: fs.createReadStream(videoPath) }, () => {
+          fs.unlink(videoPath, () => {}); // Clean temp file
+        });
+      });
+
+      writer.on("error", () => {
+        message.reply(info + "\n⚠️ Video couldn't load.");
+      });
+    } catch (err) {
+      message.reply(info + "\n⚠️ Failed to fetch video.");
+    }
+  }
 };
