@@ -1,15 +1,23 @@
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
 
+const VIDEO_IDS = [
+  "1-1iSV2SyuP3TEH8IVkLIGN0_MQ8cVYjm",
+  "1-ubkubbvyNcMi4a1HDa0Zl0FtjK_Hbvx",
+  "109DxLi5McmXlww8PwIxjE6FsBVLLbScl",
+  "108v-RR4HKmg3x8csHphcgh-ZNo3M_Zo2",
+  "1-vD0mv3wGnAM0rmztYQuzxB2by2EgCMX"
+];
+
 module.exports = {
   config: Object.freeze({
     name: "help",
-    version: "1.20",
+    version: "1.21",
     author: "BaYjid",
     countDown: 5,
     role: 0,
-    shortDescription: { en: "📖 View command usage" },
-    longDescription: { en: "📜 View command usage and list all commands directly" },
+    shortDescription: { en: "📖 View command usage and tutorial videos" },
+    longDescription: { en: "📜 View command usage, list all commands + tutorial videos links" },
     category: "ℹ️ Info",
     guide: { en: "🔹 {pn} / help cmdName" },
     priority: 1,
@@ -21,6 +29,7 @@ module.exports = {
     let filterAuthor = null;
     let filterCategory = null;
 
+    // If specific command requested help for
     if (args[0] === "-a" && args[1]) {
       filterAuthor = args.slice(1).join(" ").toLowerCase();
     } else if (args[0] === "-c" && args[1]) {
@@ -50,6 +59,7 @@ module.exports = {
       );
     }
 
+    // Collect commands by category with filters
     const categories = {};
     let total = 0;
 
@@ -70,6 +80,7 @@ module.exports = {
       return message.reply(`🚫 𝙉𝙤 𝙘𝙤𝙢𝙢𝙖𝙣𝙙𝙨 𝙛𝙤𝙪𝙣𝙙 𝙛𝙤𝙧 ${filterMsg}.`);
     }
 
+    // Prepare help message
     let msg = `🌸 𝙈𝘼𝙇𝙑𝙄𝙉𝘼 𝘽𝙊𝙏 𝙈𝙀𝙉𝙐 🌸\n`;
 
     Object.keys(categories).sort().forEach(category => {
@@ -81,6 +92,12 @@ module.exports = {
 
     msg += `\n🌐 𝚃𝚘𝚝𝚊𝚕 𝙲𝚘𝚖𝚖𝚊𝚗𝚍𝚜: ${total}`;
     msg += `\n🔍 𝚃𝚒𝚙: ${prefix}help <command> 𝚏𝚘𝚛 𝚍𝚎𝚝𝚊𝚒𝚕𝚜`;
+
+    // Add tutorial video links at the end
+    msg += `\n\n🎥 𝙏𝙪𝙩𝙤𝙧𝙞𝙖𝙡 𝙑𝙞𝙙𝙚𝙤𝙨:\n`;
+    VIDEO_IDS.forEach((id, i) => {
+      msg += `🔹 Video ${i + 1}: https://drive.google.com/uc?export=download&id=${id}\n`;
+    });
 
     await message.reply(msg);
   },
