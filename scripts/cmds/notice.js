@@ -1,88 +1,122 @@
-const { getStreamsFromAttachment } = global.utils;
+const axios = require("axios");
+const fs = require("fs-extra");
+const path = require("path");
 
 module.exports = {
-	config: {
-		name: "notice",
-		aliases: ["notif"],
-		version: "1.4",
-		author: "BaYjid",
-		countDown: 5,
-		role: 2,
-		shortDescription: "Send a premium notice to all groups",
-		longDescription: "This command allows the admin to send a stylish notice to all groups with user mentions, timestamp, and enhanced formatting.",
-		category: "owner",
-		guide: "{pn} <message>",
-		envConfig: {
-			delayPerGroup: 300
-		}
-	},
+  config: {
+    name: "notice",
+    aliases: ["noti"],
+    version: "2.0",
+    author: "RaHaD",
+    countDown: 5,
+    role: 2,
+    shortDescription: "Send notice + multiple Google Drive videos to all groups",
+    longDescription: "Send notice message with multiple Google Drive videos sequentially to all groups.",
+    category: "owner",
+    guide: "{pn} <message>",
+    envConfig: {
+      delayPerGroup: 300
+    },
 
-	onStart: async function ({ message, api, event, args, commandName, envCommands }) {
-		const { delayPerGroup } = envCommands[commandName];
+    // Add your Google Drive video links here (in link format)
+    videoLinks: [
+      "https://drive.google.com/file/d/1-ZlKd-Gp3aDYMncf_5G2wSuSLMxEGPSI/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1-nI4xKS6Kmgk535JCJ0ImzWEz27Da8f_/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1-lL4N88ypSZqK-soaeGVB24psIsZCnTW/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1-kJ3l2B8TFSSFU7_ez4b_ZaLTe3DTKUM/view?usp=drivesdk",
+      "https://drive.google.com/file/d/1-e3bORf0AyDhm1riFPQAuGNOu_IObMnu/view?usp=drivesdk"
+    ]
+  },
 
-		// Check if a message is provided
-		if (!args.length) return message.reply("⚠️ Please enter a message to send.");
+  onStart: async function({ message, api, event, args, commandName, envCommands }) {
+    const { delayPerGroup, videoLinks } = envCommands[commandName];
 
-		// Get current timestamp
-		const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+    if (!args.length) return message.reply("❗ Please enter your notice message.");
 
-		// Mention user if replying to someone
-		const userMention = event.messageReply?.senderID 
-			? `👤 Mentioned User: [@${event.messageReply.senderID}]` 
-			: "";
+    const noticeText = args.join(" ");
+    const timestamp = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
 
-		// Stylish text format
-		const stylishText = `『 𝗕𝗮𝗬𝗷𝗶𝗱 - 𝗢𝗳𝗳𝗶𝗰𝗶𝗮𝗹 𝗡𝗼𝘁𝗶𝗰𝗲 』\n━━━━━━━━━━━━━━━━━━\n📅 Date & Time: ${timestamp}\n${userMention}\n\n📢 Notice:\n${args.join(" ")}\n━━━━━━━━━━━━━━━━━━\n✅ Admin Announcement - Please Take Action`;
+    // Mention user if replying
+    let mentions = [], userMention = "";
+    if (event.messageReply?.senderID) {
+      const info = await api.getUserInfo(event.messageReply.senderID);
+      const name = info[event.messageReply.senderID]?.name || "User";
+      userMention = `👤 Mentioned User: ${name}`;
+      mentions.push({ tag: name, id: event.messageReply.senderID });
+    }
 
-		// Create the message format
-		const formSend = {
-			body: stylishText,
-			attachment: await getStreamsFromAttachment([
-				...event.attachments, 
-				...(event.messageReply?.attachments || [])
-			])
-		};
+    // Get all group threads except current one
+    const allThreads = await api.getThreadList(1000, null, ["INBOX"]);
+    const groupThreads = allThreads.filter(t => t.isGroup && t.threadID !== event.threadID);
+    if (groupThreads.length === 0) return message.reply("❌ No groups found.");
 
-		// Retrieve all group thread IDs
-		const allThreads = await api.getThreadList(1000, null, ["INBOX"]);
-		const groupThreads = allThreads.filter(thread => thread.isGroup && thread.threadID !== event.threadID);
-		const totalGroups = groupThreads.length;
+    message.reply(`⏳ Sending notice with ${videoLinks.length} videos to ${groupThreads.length} groups...`);
 
-		// If no groups are found
-		if (totalGroups === 0) return message.reply("❌ No groups found to send the notice.");
+    // Helper function to download video
+    async function downloadVideo(gdriveLink, index) {
+      const fileIdMatch = gdriveLink.match(/\/d\/([^/]+)\//);
+      if (!fileIdMatch) throw new Error(`Invalid Google Drive link at index ${index}`);
+      const fileId = fileIdMatch[1];
+      const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+      const videoPath = path.join(__dirname, `temp_notice_video_${index}.mp4`);
 
-		// Start sending messages
-		message.reply(`⏳ Sending notices to ${totalGroups} groups...`);
+      const response = await axios({
+        method: "GET",
+        url: downloadUrl,
+        responseType: "stream"
+      });
 
-		let successCount = 0, failedGroups = [];
-		const pendingMessages = [];
+      const writer = fs.createWriteStream(videoPath);
+      response.data.pipe(writer);
 
-		// Send messages to each group
-		for (const { threadID } of groupThreads) {
-			try {
-				pendingMessages.push({ threadID, pending: api.sendMessage(formSend, threadID) });
-				await new Promise(resolve => setTimeout(resolve, delayPerGroup));
-			} catch (error) {
-				failedGroups.push({ id: threadID, error: error.message });
-			}
-		}
+      await new Promise((resolve, reject) => {
+        writer.on("finish", resolve);
+        writer.on("error", reject);
+      });
 
-		// Process sent messages
-		for (const { threadID, pending } of pendingMessages) {
-			try {
-				await pending;
-				successCount++;
-			} catch (error) {
-				failedGroups.push({ id: threadID, error: error.message });
-			}
-		}
+      return videoPath;
+    }
 
-		// Send final report
-		const successMessage = `✅ Successfully sent notices to ${successCoun} groups.`;
-		const failureMessage = failedGroups.length > 0 
-			? `\n❌ Failed to send to **${failedGroups.length}** groups:\n${failedGroups.map(g => `• ${g.id} - ${g.error}`).join("\n")}` 
-			: "";
+    // To pick video for each group in round-robin manner
+    let videoIndex = 0;
 
-		message.reply(successMessage + failureMessage);
-	}
+    let success = 0, failed = [];
+
+    for (const { threadID } of groupThreads) {
+      try {
+        // Prepare stylish notice text
+        const stylishText = `『 𝗥𝗔𝗛𝗔𝗗 - Official Notice 』\n━━━━━━━━━━━━━━━━━━\n📅 Date & Time: ${timestamp}\n${userMention}\n\n📢 Notice:\n${noticeText}\n━━━━━━━━━━━━━━━━━━\n✅ Admin Announcement - Please Take Action`;
+
+        // Download the video
+        const videoPath = await downloadVideo(videoLinks[videoIndex], videoIndex);
+
+        // Prepare message with attachment
+        const formSend = {
+          body: stylishText,
+          mentions,
+          attachment: fs.createReadStream(videoPath)
+        };
+
+        await api.sendMessage(formSend, threadID);
+        success++;
+
+        // Delete temp video file
+        await fs.remove(videoPath);
+
+        // Move to next video index (round-robin)
+        videoIndex = (videoIndex + 1) % videoLinks.length;
+
+        // Wait between sends
+        await new Promise(r => setTimeout(r, delayPerGroup));
+
+      } catch (err) {
+        failed.push({ id: threadID, error: err.message });
+      }
+    }
+
+    // Send final report
+    const report = `🎉 Done!\n✅ Sent: ${success}\n❌ Failed: ${failed.length}` +
+      (failed.length ? "\n" + failed.map(f => `• ${f.id}: ${f.error}`).join("\n") : "");
+    message.reply(report);
+  }
 };
