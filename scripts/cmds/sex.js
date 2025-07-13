@@ -38,7 +38,7 @@ module.exports = {
 "https://i.imgur.com/FbnZI40.mp4",
 ]
 
-let msg = BAYJID[Math.floor(Math.random()*BAYJID.length)]
+let msg =Rahad[Math.floor(Math.random()*RAHAD.length)]
 message.send({
   body: 'sex😻',attachment: await global.utils.getStreamFromURL(msg)
 })
