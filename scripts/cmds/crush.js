@@ -5,96 +5,88 @@ const jimp = require("jimp");
 
 module.exports.config = {
   name: "crush",
-  version: "1.0.0",
+  version: "1.0.1",
   hasPermission: 0,
-  credits: "Priyansh Rajput + Fixed by ChatGPT",
-  description: "Make couple image with mention",
+  credits: "Priyansh Rajput + Debug by ChatGPT",
+  description: "Generate couple image with mention",
   commandCategory: "fun",
   usages: "[@mention]",
   cooldowns: 5
 };
 
-module.exports.onStart = async function () {
-  const imgPath = path.join(__dirname, "cache", "canvas");
-  const bgPath = path.join(imgPath, "crush.png");
-
+module.exports.onStart = async () => {
+  const dir = path.join(__dirname, "cache", "canvas");
+  const bg = path.join(dir, "crush.png");
   try {
-    if (!fs.existsSync(imgPath)) fs.mkdirSync(imgPath, { recursive: true });
-    if (!fs.existsSync(bgPath)) {
-      const imgURL = "https://i.imgur.com/PlVBaM1.jpg";
-      const response = await axios.get(imgURL, { responseType: "arraybuffer" });
-      fs.writeFileSync(bgPath, Buffer.from(response.data, "utf-8"));
-      console.log("✅ crush.png downloaded");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(bg)) {
+      console.log("[crush] → Downloading background...");
+      const resp = await axios.get("https://i.imgur.com/PlVBaM1.jpg", { responseType: "arraybuffer" });
+      fs.writeFileSync(bg, resp.data);
+      console.log("[crush] ✅ crush.png downloaded");
     }
-  } catch (err) {
-    console.error("❌ Error in onStart:", err);
+  } catch (e) {
+    console.error("[crush:onStart] Error:", e);
   }
 };
 
-async function circle(imagePath) {
-  const image = await jimp.read(imagePath);
-  image.circle();
-  return image.getBufferAsync("image/png");
+async function circle(imgPath) {
+  return (await jimp.read(imgPath)).circle().getBufferAsync("image/png");
 }
 
 async function makeImage({ one, two }) {
-  const rootPath = path.join(__dirname, "cache", "canvas");
-  const bgPath = path.join(rootPath, "crush.png");
-  const pathImg = path.join(rootPath, `crush_${one}_${two}.png`);
-  const avatarOne = path.join(rootPath, `avt_${one}.png`);
-  const avatarTwo = path.join(rootPath, `avt_${two}.png`);
+  const dir = path.join(__dirname, "cache", "canvas");
+  const bg = path.join(dir, "crush.png");
+  const out = path.join(dir, `out_${one}_${two}.png`);
+  const a1 = path.join(dir, `a1_${one}.png`);
+  const a2 = path.join(dir, `a2_${two}.png`);
 
+  console.log("[crush] → Fetching avatar for IDs:", one, two);
   try {
-    console.log("🔁 Fetching avatars...");
-
-    const [dataOne, dataTwo] = await Promise.all([
+    const [r1, r2] = await Promise.all([
       axios.get(`https://graph.facebook.com/${one}/picture?width=512&height=512`, { responseType: "arraybuffer" }),
       axios.get(`https://graph.facebook.com/${two}/picture?width=512&height=512`, { responseType: "arraybuffer" })
     ]);
+    fs.writeFileSync(a1, r1.data);
+    fs.writeFileSync(a2, r2.data);
+    console.log("[crush] ✅ Avatars saved");
 
-    fs.writeFileSync(avatarOne, Buffer.from(dataOne.data, "utf-8"));
-    fs.writeFileSync(avatarTwo, Buffer.from(dataTwo.data, "utf-8"));
+    const imgBg = await jimp.read(bg);
+    const c1 = await jimp.read(await circle(a1));
+    const c2 = await jimp.read(await circle(a2));
 
-    const bg = await jimp.read(bgPath);
-    const circOne = await jimp.read(await circle(avatarOne));
-    const circTwo = await jimp.read(await circle(avatarTwo));
+    imgBg.composite(c1.resize(191, 191), 93, 111);
+    imgBg.composite(c2.resize(190, 190), 434, 107);
+    const final = await imgBg.getBufferAsync("image/png");
+    fs.writeFileSync(out, final);
+    fs.unlinkSync(a1);
+    fs.unlinkSync(a2);
 
-    bg.composite(circOne.resize(191, 191), 93, 111);
-    bg.composite(circTwo.resize(190, 190), 434, 107);
-
-    const raw = await bg.getBufferAsync("image/png");
-    fs.writeFileSync(pathImg, raw);
-
-    fs.unlinkSync(avatarOne);
-    fs.unlinkSync(avatarTwo);
-
-    console.log("✅ Image generated:", pathImg);
-    return pathImg;
+    console.log("[crush] ✅ Image created at:", out);
+    return out;
   } catch (err) {
-    console.error("❌ makeImage error:", err);
-    throw new Error("ছবি তৈরিতে সমস্যা হয়েছে!");
+    console.error("[crush:makeImage] Error:", err);
+    throw new Error("ছবি তৈরিতে সমস্যা হয়েছে! ডিবাগ কনসোল দেখো 🔍");
   }
 }
 
-module.exports.run = async function ({ event, api }) {
+module.exports.run = async ({ event, api }) => {
   const mention = Object.keys(event.mentions);
   const { threadID, messageID, senderID } = event;
 
-  if (!mention[0]) {
-    return api.sendMessage("🥲 দোস্ত কাউকে তো ট্যাগ কর আগে!", threadID, messageID);
+  if (!mention.length) {
+    return api.sendMessage("দোস্ত কাউকে ট্যাগ দাও আগে 😅", threadID, messageID);
   }
 
-  const one = senderID;
-  const two = mention[0];
-
   try {
-    const imgPath = await makeImage({ one, two });
-    const msg = {
-      body: "✧•❁𝐂𝐫𝐮𝐬𝐡❁•✧\n\n╔═══❖••° °••❖═══╗\n   𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥 𝐏𝐚𝐢𝐫𝐢𝐧𝐠\n╚═══❖••° °••❖═══╝\n\n😏𝐃𝐇𝐎𝐑 𝐓𝐎𝐑 𝐆𝐅 𝐊𝐄 💘",
-      attachment: fs.createReadStream(imgPath)
-    };
-    api.sendMessage(msg, threadID, () => fs.unlinkSync(imgPath), messageID);
-  } catch (err) {
-    api.sendMessage("❌ ছবি তৈরিতে সমস্যা হয়েছে!", threadID, messageID);
+    const out = await makeImage({ one: senderID, two: mention[0] });
+    api.sendMessage({
+      body: "😏𝐃𝐇𝐎𝐑 𝐓𝐎𝐑 𝐆𝐅 𝐊𝐄 💘",
+      attachment: fs.createReadStream(out)
+    }, threadID, () => {
+      fs.unlinkSync(out);
+    }, messageID);
+  } catch (e) {
+    api.sendMessage(e.message, threadID, messageID);
   }
 };
