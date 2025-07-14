@@ -2,7 +2,7 @@ const { getTime, drive } = global.utils;
 
 if (!global.temp.welcomeEvent) global.temp.welcomeEvent = {};
 
-// All your provided video IDs
+// All your provided video IDs (20 total)
 const welcomeVideos = [
   "1-RV0_mJS0vAZpvO6IDK3f5eJuLIE3jhm",
   "112ZN4pmSeC-HQwi-mG1jrI9qSLKufx7-",
@@ -10,7 +10,20 @@ const welcomeVideos = [
   "11D5NNC6idmP-b73pW9NWyFxJLKwgrhXs",
   "11BCayJggvB3dYlyRhOXAvNIEskJwpCQy",
   "119ylfNLTQuWY7wvfhsEp1yiJqZWkTOU9",
-  "119a5bZ4PuXwe8YRVVVXqXZo4C-scjAvf"
+  "119a5bZ4PuXwe8YRVVVXqXZo4C-scjAvf",
+  "1-4OuBJcRofhVezoTG3TczAqUfwU9BIZc",
+  "1-CiTVJOWhBt1i7ARGYSDAt-YtI1XMhfm",
+  "1-4rdl8B_xgJXWG0S-0MPtYguakcW9g5Q",
+  "1-4QERypOY5zq3pP_lyHEG3PkLf_8vHUK",
+  "1-nKDX3r1LjbStMdF_l3Kkh_6kaOc93qZ",
+  "1-jcSHj51Id-WWozUVO87hD8XZ8Ro4m6v",
+  "1-bWQtOJPtPg2yjJo8Df8bypwhsVOOCo_",
+  "1-SndcWaqezYDpJ8niqat3MzfuYK0eqpm",
+  "1-QqacRvRKmKQgG_rpvyxzwz2YetXWLrf",
+  "1-PnaaGCVhmstwbTQWoKhoEWHB3lM-aqn",
+  "1-HcZY03oIUd2wQY2SD6MbMVGv1K68aMo",
+  "1-GalZuIDxBP0B2LICslKVv02JK2ic091",
+  "1-FCSzBOgKbEWQXRaGvn9nwFu6Jz6qXQp"
 ];
 
 module.exports = {
