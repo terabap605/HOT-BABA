@@ -7,7 +7,17 @@ const VIDEO_IDS = [
   "1-WKsuSsLsO8BKc2Oil0KAxvgcwcsFTA3",
   "1-8VSzbLm7c2eBesp8YwwvJxdhs0dcFSL",
   "102gwONoMStLZxNUuRH7SQ0j8mmwoGMg6",
-  "10QycYgsTagrN90cWJCIWWVwmps2kk_oF"
+  "10QycYgsTagrN90cWJCIWWVwmps2kk_oF",
+  "10yCXj_k-vQ3JZ4CDBI47q1QAGStgqGGf",
+  "10fnG0B9mjJm7kiOfhCmxaWJAnO6byg7h",
+  "10bLixrdA5AMDX_ghc0gh2KrNqFnlXCWt",
+  "10hN25pp9xP3ta7-nRxqRDeqRDYSQsi8t",
+  "10tylA-0PZt29bEwbMQliFJRLyNgpUSPy",
+  "10igHuFfPMYdAXE5jHJg7E1Bg_EmNbsxp",
+  "11Xke5bDTf1wVmVTyztfQoi59wqJ-cHyJ",
+  "11zdP9h5IEQsHIbyMXU180TDrVwPWev2Y",
+  "11z3srLyFgG0QhNeC9VoVfhxNrfanRYTq",
+  "11fe0PJXCJ3qbmJ_SgPEHK03_NPk48ATa"
 ];
 
 module.exports = {
