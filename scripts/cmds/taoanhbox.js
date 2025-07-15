@@ -1,25 +1,18 @@
-const fs = global.nodemodule && global.nodemodule["fs-extra"] ? global.nodemodule["fs-extra"] : require("fs-extra");
-const axios = global.nodemodule && global.nodemodule["axios"] ? global.nodemodule["axios"] : require("axios");
-const jimp = global.nodemodule && global.nodemodule["jimp"] ? global.nodemodule["jimp"] : require("jimp");
-const Canvas = global.nodemodule && global.nodemodule["canvas"] ? global.nodemodule["canvas"] : require("canvas");
-const superfetch = global.nodemodule && global.nodemodule["node-superfetch"] ? global.nodemodule["node-superfetch"] : require("node-superfetch");
+const fs = require("fs-extra");
+const axios = require("axios");
+const jimp = require("jimp");
+const Canvas = require("canvas");
+const superfetch = require("node-superfetch");
 
 module.exports.config = {
   name: "taoanhbox",
-  version: "1.0.0",
+  version: "1.0.1",
   hasPermssion: 0,
   credits: "shion - modified by Bayjid & ChatGPT",
-  description: "Create a group image with all members' avatars",
+  description: "Create a group photo with all members' avatars",
   commandCategory: "group",
-  usages: "taoanhbox [size] [#hexcolor] [title]",
-  cooldowns: 5,
-  dependencies: {
-    "fs-extra": "",
-    "axios": "",
-    "canvas": "",
-    "jimp": "",
-    "node-superfetch": ""
-  }
+  usages: "taoanhbox [size] [#color] [title]",
+  cooldowns: 5
 };
 
 module.exports.circle = async (image) => {
@@ -31,29 +24,25 @@ module.exports.circle = async (image) => {
 module.exports.onStart = async function ({ event, api, args }) {
   const { threadID, messageID } = event;
   const img = new Canvas.Image();
-
   const delay = ms => new Promise(res => setTimeout(res, ms));
+
   let live = [], admin = [], i = 0;
 
   if (args[0] === "help" || args[0] === "0" || args[0] === "-h") {
     return api.sendMessage(
       `📌 Usage: taoanhbox <size> <#color> <title>\n` +
-      `- size: avatar size\n` +
-      `- #color: text color in hex (optional)\n` +
-      `- title: image title (optional)\n\n` +
-      `🧪 Example: taoanhbox 200 #ffffff My Family\nIf blank, defaults will be used.`,
+      `Example: taoanhbox 200 #ffffff My Family\n` +
+      `If blank, defaults will be used.`,
       threadID, messageID
     );
   }
 
-  // FONT SETUP
   const fontPath = __dirname + `/cache/data/TUVBenchmark.ttf`;
   if (!fs.existsSync(fontPath)) {
     const fontData = (await axios.get(`https://drive.google.com/u/0/uc?id=1NIoSu00tStE8bIpVgFjWt2in9hkiIzYz&export=download`, { responseType: "arraybuffer" })).data;
     fs.outputFileSync(fontPath, Buffer.from(fontData, "utf-8"));
   }
 
-  // BACKGROUNDS
   const backgrounds = [
     'https://i.imgur.com/P3QrAgh.jpg',
     'https://i.imgur.com/RueGAGI.jpg',
@@ -67,12 +56,10 @@ module.exports.onStart = async function ({ event, api, args }) {
   const ctx = canvas.getContext("2d");
   ctx.drawImage(background, 0, 0, bgX, bgY);
 
-  // GROUP INFO
   const { participantIDs, adminIDs, name, userInfo } = await api.getThreadInfo(threadID);
   for (let ad of adminIDs) admin.push(ad.id);
   for (let user of userInfo) if (user.gender !== undefined) live.push(user);
 
-  // SETUP
   const totalArea = bgX * (bgY - 200);
   const autoSize = Math.floor(Math.sqrt(Math.floor(totalArea / live.length)));
   const size = args[0] ? parseInt(args[0]) : autoSize;
