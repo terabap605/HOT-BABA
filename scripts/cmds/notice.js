@@ -6,14 +6,14 @@ module.exports = {
   config: {
     name: "notice",
     aliases: ["notif"],
-    version: "2.0",
+    version: "2.1",
     author: "RaHaD",
     countDown: 5,
     role: 2,
-    shortDescription: "Send notice + multiple Google Drive videos to all groups",
-    longDescription: "Send notice message with multiple Google Drive videos sequentially to all groups.",
+    shortDescription: "Send notice + random Google Drive video to all groups",
+    longDescription: "Send notice message with a different random video (no repeat per group) to all groups.",
     category: "owner",
-    guide: "{pn}",
+    guide: "{pn} Your Notice Text",
     envConfig: {
       delayPerGroup: 300,
       videoLinks: [
@@ -68,14 +68,14 @@ module.exports = {
     const groupThreads = allThreads.filter(t => t.isGroup && t.threadID !== event.threadID);
     if (groupThreads.length === 0) return message.reply("❌ No groups found.");
 
-    message.reply(`⏳ Sending notice with ${videoLinks.length} videos to ${groupThreads.length} groups...`);
+    message.reply(`⏳ Sending notice with random videos to ${groupThreads.length} groups...`);
 
     async function downloadVideo(gdriveLink, index) {
       const fileIdMatch = gdriveLink.match(/\/d\/([^/]+)\//);
       if (!fileIdMatch) throw new Error(`Invalid Google Drive link at index ${index}`);
       const fileId = fileIdMatch[1];
       const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-      const videoPath = path.join(__dirname, `temp_notice_video_${index}.mp4`);
+      const videoPath = path.join(__dirname, `temp_notice_video_${Date.now()}_${index}.mp4`);
 
       const response = await axios({
         method: "GET",
@@ -94,26 +94,38 @@ module.exports = {
       return videoPath;
     }
 
-    let videoIndex = 0;
     let success = 0, failed = [];
+    const groupVideoHistory = {}; // Track which group got which video indexes
 
     for (const { threadID } of groupThreads) {
       try {
+        const usedIndexes = groupVideoHistory[threadID] || [];
+        const availableIndexes = videoLinks
+          .map((_, i) => i)
+          .filter(i => !usedIndexes.includes(i));
+
+        if (availableIndexes.length === 0) {
+          groupVideoHistory[threadID] = [];
+          availableIndexes.push(...videoLinks.map((_, i) => i));
+        }
+
+        const randomIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+        const selectedLink = videoLinks[randomIndex];
+        const videoPath = await downloadVideo(selectedLink, randomIndex);
+
         const stylishText = `『 𝗥𝗔𝗛𝗔𝗗 - Official Notice 』\n━━━━━━━━━━━━━━━━━━\n📅 Date & Time: ${timestamp}\n${userMention}\n\n📢 Notice:\n${noticeText}\n━━━━━━━━━━━━━━━━━━\n✅ Admin Announcement - Please Take Action`;
 
-        const videoPath = await downloadVideo(videoLinks[videoIndex], videoIndex);
-
-        const formSend = {
+        await api.sendMessage({
           body: stylishText,
           mentions,
           attachment: fs.createReadStream(videoPath)
-        };
-
-        await api.sendMessage(formSend, threadID);
-        success++;
+        }, threadID);
 
         await fs.remove(videoPath);
-        videoIndex = (videoIndex + 1) % videoLinks.length;
+        success++;
+
+        if (!groupVideoHistory[threadID]) groupVideoHistory[threadID] = [];
+        groupVideoHistory[threadID].push(randomIndex);
 
         await new Promise(r => setTimeout(r, delayPerGroup));
       } catch (err) {
