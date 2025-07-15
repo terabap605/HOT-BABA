@@ -9,14 +9,14 @@ module.exports = {
   config: {
     name: "taoanhbox",
     aliases: ["groupcard"],
-    version: "1.2",
+    version: "1.4",
     author: "Bayjid x ChatGPT",
     countDown: 5,
     role: 0,
-    shortDescription: "Create a group image card",
-    longDescription: "Generates a visual group poster using members' avatars",
+    shortDescription: "Generate group image card",
+    longDescription: "Creates a stylish group card with avatars and titles",
     category: "group",
-    guide: "{pn} [optional title]",
+    guide: "+taoanhbox [optional title]",
   },
 
   onStart: async function ({ api, event, args }) {
@@ -26,13 +26,11 @@ module.exports = {
       const threadInfo = await api.getThreadInfo(threadID);
       const members = threadInfo.participantIDs;
       const admins = threadInfo.adminIDs.map(e => e.id);
-      const title = args.join(" ") || threadInfo.threadName || "Group Info";
+      const title = args.join(" ") || threadInfo.threadName || "Group Card";
 
-      // Prepare cache folder
       const cacheDir = path.join(__dirname, "cache", "data");
       fs.ensureDirSync(cacheDir);
 
-      // Download font if not exists
       const fontPath = path.join(cacheDir, "UTM-Avo.ttf");
       if (!fs.existsSync(fontPath)) {
         const fontUrl = "https://github.com/lamdaVn/font/raw/main/UTM-Avo.ttf";
@@ -42,26 +40,22 @@ module.exports = {
 
       Canvas.registerFont(fontPath, { family: "UTM-Avo" });
 
-      // Setup canvas
       const canvas = Canvas.createCanvas(1500, 800);
       const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#2C3E50";
+      ctx.fillStyle = "#1e1e2e";
       ctx.fillRect(0, 0, 1500, 800);
 
-      // Add title text
       ctx.font = "bold 50px UTM-Avo";
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
       ctx.fillText(title, 750, 70);
 
-      // Circle crop function
       const circle = async (buffer) => {
         const img = await jimp.read(buffer);
         img.circle();
         return await img.getBufferAsync("image/png");
       };
 
-      // Draw avatars
       const avatarSize = 130;
       const padding = 30;
       let x = 70, y = 120, count = 0;
@@ -88,12 +82,9 @@ module.exports = {
             x = 70;
             y += avatarSize + padding;
           }
-        } catch (avatarErr) {
-          console.warn(`Failed to load avatar for ${uid}:`, avatarErr.message);
-        }
+        } catch (_) {}
       }
 
-      // Save image and send
       const outputPath = path.join(cacheDir, `group_card_${Date.now()}.png`);
       const out = fs.createWriteStream(outputPath);
       const stream = canvas.createPNGStream();
@@ -101,7 +92,7 @@ module.exports = {
 
       out.on("finish", () => {
         api.sendMessage({
-          body: `âœ… Group Card Generated
+          body: `âœ… Group Card Created!
 ðŸ“› Title: ${title}
 ðŸ‘¥ Members: ${members.length}
 ðŸ‘‘ Admins: ${admins.length}`,
@@ -110,8 +101,7 @@ module.exports = {
       });
 
     } catch (err) {
-      console.error("Taoanhbox error:", err);
-      api.sendMessage("âŒ Failed to generate group card. Please try again later.", event.threadID, event.messageID);
+      api.sendMessage("âŒ Error: Could not generate group card. Make sure required modules are installed.", event.threadID, event.messageID);
     }
   },
 };
