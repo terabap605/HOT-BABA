@@ -2,7 +2,7 @@ const { getTime, drive } = global.utils;
 
 if (!global.temp.welcomeEvent) global.temp.welcomeEvent = {};
 
-// All your provided video IDs (20 total)
+// All your 20 welcome video IDs
 const welcomeVideos = [
   "1-RV0_mJS0vAZpvO6IDK3f5eJuLIE3jhm",
   "112ZN4pmSeC-HQwi-mG1jrI9qSLKufx7-",
@@ -36,13 +36,12 @@ module.exports = {
 
   langs: {
     en: {
-      session1: "☀ 𝓜𝓸𝓻𝓷𝓲𝓷𝓰",
-      session2: "⛅ 𝓝𝓸𝓸𝓷",
-      session3: "🌆 𝓐𝓯𝓽𝓮𝓻𝓷𝓸𝓸𝓷",
-      session4: "🌙 𝓔𝓿𝓮𝓷𝓲𝓷𝓰",
-      welcomeMessage: "🎉 『 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 』 🎉\n\n💠 𝗛𝗲𝘆 {userName}!\n🔹 𝗬𝗼𝘂 𝗷𝘂𝘀𝘁 𝗷𝗼𝗶𝗻𝗲𝗱 『 {boxName} 』\n⏳ 𝗧𝗶𝗺𝗲 𝗳𝗼𝗿 𝘀𝗼𝗺𝗲 𝗳𝘂𝗻! 𝗛𝗮𝘃𝗲 𝗮 𝗳𝗮𝗻𝘁𝗮𝘀𝘁𝗶𝗰 {session} 🎊\n\n⚠ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗳𝗼𝗹𝗹𝗼𝘄 𝗮𝗹𝗹 𝗴𝗿𝗼𝘂𝗽 𝗿𝘂𝗹𝗲𝘀! 🚀\n\n👤 𝗔𝗱𝗱𝗲𝗱 𝗯𝘆: {adderName}",
-      multiple1: "🔹 𝖸𝗈𝗎",
-      multiple2: "🔹 𝖸𝗈𝗎 𝖦𝗎𝗒𝗌"
+      session1: "☀ Morning",
+      session2: "⛅ Noon",
+      session3: "🌆 Afternoon",
+      session4: "🌙 Evening",
+      welcomeMessage:
+        "🎉 『 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 』 🎉\n\n💠 Hey {userName}!\n🔹 You just joined 『 {boxName} 』\n⏳ Time for some fun! Have a fantastic {session} 🎊\n\n⚠ Please follow all group rules! 🚀\n\n👤 Added by: {adderName}"
     }
   },
 
@@ -50,14 +49,16 @@ module.exports = {
     if (event.logMessageType !== "log:subscribe") return;
 
     const { threadID, logMessageData } = event;
-    const added = logMessageData.addedParticipants;
-    const hours = getTime("HH");
-    const nickNameBot = global.GoatBot.config.nickNameBot;
+    const added = logMessageData?.addedParticipants || [];
+    const botID = api.getCurrentUserID();
 
-    // If bot was added
-    if (added.some(u => u.userFbId === api.getCurrentUserID())) {
-      if (nickNameBot) api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
-      return message.send(getLang("welcomeMessage", global.utils.getPrefix(threadID)));
+    if (!added.length) return;
+
+    // Bot was added
+    if (added.some(u => u.userFbId === botID)) {
+      const nickNameBot = global.GoatBot.config.nickNameBot;
+      if (nickNameBot) await api.changeNickname(nickNameBot, threadID, botID);
+      return message.send("👋 Hello everyone! I'm your new welcome bot. Let's have some fun!");
     }
 
     if (!global.temp.welcomeEvent[threadID])
@@ -67,42 +68,65 @@ module.exports = {
     clearTimeout(global.temp.welcomeEvent[threadID].joinTimeout);
 
     global.temp.welcomeEvent[threadID].joinTimeout = setTimeout(async () => {
-      const td = await threadsData.get(threadID);
-      const members = global.temp.welcomeEvent[threadID].data;
-      const banned = td.data.banned_ban || [];
-      const threadName = td.threadName;
-
-      const newMembers = members.filter(m => !banned.some(b => b.id === m.userFbId));
-      if (newMembers.length === 0) return;
-
-      const mentions = newMembers.map(u => ({ tag: u.fullName, id: u.userFbId }));
-      const names = newMembers.map(u => u.fullName).join(", ");
-      const adderInfo = await api.getUserInfo(event.author);
-      const adderName = adderInfo[event.author]?.name || "Someone";
-      mentions.push({ tag: adderName, id: event.author });
-
-      const session = hours <= 10 ? getLang("session1") :
-                      hours <= 12 ? getLang("session2") :
-                      hours <= 18 ? getLang("session3") : getLang("session4");
-
-      const body = getLang("welcomeMessage")
-        .replace("{userName}", names)
-        .replace("{boxName}", threadName)
-        .replace("{session}", session)
-        .replace("{adderName}", adderName);
-
-      // Pick a random video
-      const fileId = welcomeVideos[Math.floor(Math.random() * welcomeVideos.length)];
-      let attachment = null;
       try {
-        const stream = await drive.getFile(fileId, "stream");
-        if (stream) attachment = [stream];
-      } catch (err) {
-        console.error("❌ Video Load Error:", err.message);
-      }
+        const td = await threadsData.get(threadID);
+        const members = global.temp.welcomeEvent[threadID].data;
+        const banned = td?.data?.banned_ban || [];
+        const threadName = td?.threadName || "this group";
 
-      await message.send({ body, mentions, attachment });
-      delete global.temp.welcomeEvent[threadID];
+        const newMembers = members.filter(
+          m => !banned.some(b => b.id === m.userFbId)
+        );
+        if (!newMembers.length) return;
+
+        const mentions = newMembers.map(u => ({
+          tag: u.fullName,
+          id: u.userFbId
+        }));
+        const names = newMembers.map(u => u.fullName).join(", ");
+
+        const adderInfo = await api.getUserInfo(event.author);
+        const adderName = adderInfo?.[event.author]?.name || "Someone";
+        mentions.push({ tag: adderName, id: event.author });
+
+        const hours = getTime("HH");
+        const session =
+          hours <= 10
+            ? getLang("session1")
+            : hours <= 12
+            ? getLang("session2")
+            : hours <= 18
+            ? getLang("session3")
+            : getLang("session4");
+
+        const body = getLang("welcomeMessage")
+          .replace("{userName}", names)
+          .replace("{boxName}", threadName)
+          .replace("{session}", session)
+          .replace("{adderName}", adderName);
+
+        const fileId =
+          welcomeVideos[Math.floor(Math.random() * welcomeVideos.length)];
+        let attachment = null;
+
+        try {
+          const stream = await drive.getFile(fileId, "stream");
+          if (stream) attachment = [stream];
+        } catch (err) {
+          console.warn(`[WELCOME] ⚠️ Failed to load video: ${err.message}`);
+        }
+
+        await message.send({
+          body,
+          mentions,
+          attachment
+        });
+      } catch (err) {
+        console.error(`[WELCOME] ❌ Error:`, err);
+        await message.send("⚠️ Failed to send welcome message due to an internal error.");
+      } finally {
+        delete global.temp.welcomeEvent[threadID];
+      }
     }, 1500);
   }
 };
