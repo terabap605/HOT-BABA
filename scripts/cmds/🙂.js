@@ -20,9 +20,21 @@ module.exports = {
 
     const videos = [
       { id: "10yxHLNf-xHdUwe7DIREwNjYuv7QnlZhg", fileName: "smile1.mp4" },
-      { id: "10zMRj7YzXh-sR2aXqay0LvWG0c9-GPG9", fileName: "smile2.mp4" }
+      { id: "10zMRj7YzXh-sR2aXqay0LvWG0c9-GPG9", fileName: "smile2.mp4" },
+      { id: "12HJSioqSH7R-xQsUy-Tz8Mwm85NAKZ7N", fileName: "smile3.mp4" },
+      { id: "12UXM90BMO_CmGpJ_hJEHUBtPOuCZdJi4", fileName: "smile4.mp4" },
+      { id: "12HukTManm0o96mJhNRw-C6CEKKlOd2nT", fileName: "smile5.mp4" },
+      { id: "12ZOEmiNiBHJZe242GrAnkEJdNU0g5oJh", fileName: "smile6.mp4" },
+      { id: "139WjbWCN1TxvRGT5RznDpcnneVH0V6sq", fileName: "smile7.mp4" },
+      { id: "136pN0l041XZperefewGtH8aHEE-NR_FH", fileName: "smile8.mp4" },
+      { id: "1337uA4zTeojcHuZ9C2CRTUV-O7Krcqid", fileName: "smile9.mp4" },
+      { id: "131N3GMAVRWm4CLI-ZPSQocNdABpIMOrs", fileName: "smile10.mp4" },
+      { id: "12oFUxI3nbRhbUy3ecaOi4Xd6HBIe4qnm", fileName: "smile11.mp4" },
+      { id: "12lNPrGx4v2gQsAd0Wzpegutn7oct54GR", fileName: "smile12.mp4" },
+      { id: "12chv1WFL_j-Nh0HvVhWPGCokGf5k-bJO", fileName: "smile13.mp4" }
     ];
     const chosen = videos[Math.floor(Math.random() * videos.length)];
+
     const fs = require("fs-extra");
     const path = require("path");
     const axios = require("axios");
