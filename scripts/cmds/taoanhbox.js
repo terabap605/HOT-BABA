@@ -14,7 +14,7 @@ module.exports.config = {
   cooldowns: 5
 };
 
-module.exports.run = async function ({ api, event }) {
+module.exports.onStart = async function ({ api, event }) {
   const threadID = event.threadID;
   const messageID = event.messageID;
 
@@ -30,7 +30,7 @@ module.exports.run = async function ({ api, event }) {
 
   try {
     const threadInfo = await api.getThreadInfo(threadID);
-    const members = threadInfo.participantIDs.slice(0, 25); // max 25 members
+    const members = threadInfo.participantIDs.slice(0, 25); // Max 25
     const adminIDs = threadInfo.adminIDs.map(admin => admin.id);
     const groupName = threadInfo.threadName || "Group Chat";
 
@@ -42,7 +42,7 @@ module.exports.run = async function ({ api, event }) {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
 
-    // Text setup
+    // Draw group info text
     ctx.font = "bold 32px Arial";
     ctx.fillStyle = "white";
     ctx.strokeStyle = "black";
@@ -58,7 +58,7 @@ module.exports.run = async function ({ api, event }) {
     ctx.strokeText(groupName, canvas.width / 2 - ctx.measureText(groupName).width / 2, 100);
     ctx.fillText(groupName, canvas.width / 2 - ctx.measureText(groupName).width / 2, 100);
 
-    // Avatar layout
+    // Avatar layout config
     const avatarSize = 100;
     const spacing = 20;
     const avatarsPerRow = 7;
@@ -76,7 +76,7 @@ module.exports.run = async function ({ api, event }) {
         const avatarRes = await axios.get(avatarURL, { responseType: "arraybuffer" });
         const avatarImg = await Canvas.loadImage(Buffer.from(avatarRes.data, "binary"));
 
-        // Draw avatar in circle
+        // Draw avatar
         ctx.save();
         ctx.beginPath();
         ctx.arc(x + avatarSize / 2, y + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
@@ -85,7 +85,7 @@ module.exports.run = async function ({ api, event }) {
         ctx.drawImage(avatarImg, x, y, avatarSize, avatarSize);
         ctx.restore();
 
-        // Draw border
+        // Border
         ctx.beginPath();
         ctx.arc(x + avatarSize / 2, y + avatarSize / 2, avatarSize / 2 + 4, 0, Math.PI * 2);
         ctx.strokeStyle = isAdmin ? "red" : "#00FFFF";
@@ -93,20 +93,21 @@ module.exports.run = async function ({ api, event }) {
         ctx.stroke();
 
       } catch (e) {
-        console.log(`❌ Failed avatar load: ${id}`);
+        console.log(`❌ Failed to load avatar: ${id}`);
       }
     }
 
+    // Save & send
     const imgPath = path.join(__dirname, "cache", `groupbox_${threadID}.png`);
     fs.writeFileSync(imgPath, canvas.toBuffer());
 
     api.sendMessage({
-      body: `✅ Group image created successfully!`,
+      body: `✅ Group image created!`,
       attachment: fs.createReadStream(imgPath)
     }, threadID, () => fs.unlinkSync(imgPath));
 
   } catch (err) {
     console.error(err);
-    api.sendMessage("❌ Failed to generate image.", threadID, messageID);
+    api.sendMessage("❌ Error: failed to generate image.", threadID, messageID);
   }
 };
