@@ -2,96 +2,61 @@ module.exports = {
 	config: {
 		name: "balance",
 		aliases: ["bal"],
-		version: "1.5",
-		author: "BaYjid",
+		version: "1.2",
+		author: "NTKhang (Mostakim)",
 		countDown: 5,
 		role: 0,
 		description: {
-			vi: "xem số tiền hiện có của bạn hoặc người được tag, hoặc thêm tiền",
-			en: "view your money, the money of the tagged person, or add money"
+			vi: "xem số tiền hiện có của bạn hoặc người được tag",
+			en: "view your money or the money of the tagged person"
 		},
 		category: "economy",
 		guide: {
 			vi: "   {pn}: xem số tiền của bạn"
-				+ "\n   {pn} <@tag>: xem số tiền của người được tag"
-				+ "\n   {pn} add <số tiền>: thêm tiền vào tài khoản của bạn"
-				+ "\n   {pn} add <số tiền> <@tag>: thêm tiền cho người được tag",
+				+ "\n   {pn} <@tag>: xem số tiền của người được tag",
 			en: "   {pn}: view your money"
 				+ "\n   {pn} <@tag>: view the money of the tagged person"
-				+ "\n   {pn} add <amount>: add money to your account"
-				+ "\n   {pn} add <amount> <@tag>: give money to the tagged person"
 		}
 	},
 
 	langs: {
 		vi: {
 			money: "Bạn đang có %1$",
-			moneyOf: "%1 đang có %2$",
-			addedMoney: "Đã thêm %1$ vào tài khoản của bạn. Số dư hiện tại: %2$",
-			addedMoneyTo: "Bạn đã chuyển %1$ cho %2. Số dư của bạn: %3$",
-			invalidAmount: "Số tiền không hợp lệ.",
-			notEnoughMoney: "Bạn không có đủ tiền để chuyển.",
-			limitExceeded: "Bạn chỉ có thể thêm tối đa 500$ một lần."
+			moneyOf: "%1 đang có %2$"
 		},
 		en: {
-			money: "💰 | 𝚈𝚘𝚞'𝚜 𝚆𝚊𝚕𝚕𝚎𝚝:\n━━━━━━━━━━━━━━\n💵 𝗕𝗔𝗟𝗔𝗡𝗖𝗘: %1$ \n━━━━━━━━━━━━━━\n🎉🎉🎉🎉🎉🎉🎉🎉",
-			moneyOf: "%1 has %2$",
-			addedMoney: "✅ Added %1$ to your account. New balance: %2$",
-			addedMoneyTo: "✅ You sent %1$ to %2. Your new balance: %3$",
-			invalidAmount: "❌ Invalid amount.",
-			notEnoughMoney: "❌ You don't have enough money to send.",
-			limitExceeded: "❌ You can only add a maximum of 200$ at a time."
+			money: "You have %1$",
+			moneyOf: "%1 has %2$"
 		}
 	},
 
-	onStart: async function ({ message, usersData, event, args, getLang }) {
-		// Replace with the actual admin user ID
-		const adminID = "100005193854879"; 
-
-		if (args[0] === "add") {
-			const amount = parseInt(args[1]);
-			if (isNaN(amount) || amount <= 0) return message.reply(getLang("invalidAmount"));
-
-			// Check if user is an admin; if not, apply the limit
-			const isAdmin = event.senderID === adminID;
-			if (!isAdmin && amount > 200) return message.reply(getLang("limitExceeded")); // Limit amount to 200 for non-admins
-
-			const senderData = await usersData.get(event.senderID);
-
-			if (Object.keys(event.mentions).length > 0) {
-				const uid = Object.keys(event.mentions)[0];
-				const recipientData = await usersData.get(uid);
-
-				// Check if sender has enough money to send
-				if (senderData.money < amount) return message.reply(getLang("notEnoughMoney"));
-
-				// Deduct money from sender and add to recipient
-				senderData.money -= amount;
-				recipientData.money += amount;
-
-				await usersData.set(event.senderID, senderData);
-				await usersData.set(uid, recipientData);
-
-				return message.reply(getLang("addedMoneyTo", amount, event.mentions[uid].replace("@", ""), senderData.money));
-			}
-
-			// If no user is mentioned, add money to sender's account
-			senderData.money += amount;
-			await usersData.set(event.senderID, senderData);
-			return message.reply(getLang("addedMoney", amount, senderData.money));
-		}
+	onStart: async function ({ message, usersData, event, getLang }) {
+		const formatBoldSerif = (text) => {
+			const boldSerifMap = {
+				a: "𝐚", b: "𝐛", c: "𝐜", d: "𝐝", e: "𝐞", f: "𝐟", g: "𝐠", h: "𝐡", i: "𝐢", j: "𝐣",
+				k: "𝐤", l: "𝐥", m: "𝐦", n: "𝐧", o: "𝐨", p: "𝐩", q: "𝐪", r: "𝐫", s: "𝐬", t: "𝐭",
+				u: "𝐮", v: "𝐯", w: "𝐰", x: "𝐱", y: "𝐲", z: "𝐳",
+				A: "𝐀", B: "𝐁", C: "𝐂", D: "𝐃", E: "𝐄", F: "𝐅", G: "𝐆", H: "𝐇", I: "𝐈", J: "𝐉",
+				K: "𝐊", L: "𝐋", M: "𝐌", N: "𝐍", O: "𝐎", P: "𝐏", Q: "𝐐", R: "𝐑", S: "𝐒", T: "𝐓",
+				U: "𝐔", V: "𝐕", W: "𝐖", X: "𝐗", Y: "𝐘", Z: "𝐙",
+				"0": "𝟎", "1": "𝟏", "2": "𝟐", "3": "𝟑", "4": "𝟒", "5": "𝟓", "6": "𝟔", "7": "𝟕", "8": "𝟖", "9": "𝟗",
+				"$": "$", ".": ".", ",": ",", ":": ":", "-": "-", " ": " "
+			};
+			return text.split('').map(char => boldSerifMap[char] || char).join('');
+		};
 
 		if (Object.keys(event.mentions).length > 0) {
 			const uids = Object.keys(event.mentions);
 			let msg = "";
 			for (const uid of uids) {
 				const userMoney = await usersData.get(uid, "money");
-				msg += getLang("moneyOf", event.mentions[uid].replace("@", ""), userMoney) + '\n';
+				const name = event.mentions[uid].replace("@", "");
+				msg += formatBoldSerif(getLang("moneyOf", name, userMoney)) + '\n';
 			}
-			return message.reply(msg);
+			return message.reply(msg.trim());
 		}
 
 		const userData = await usersData.get(event.senderID);
-		message.reply(getLang("money", userData.money));
+		return message.reply(formatBoldSerif(getLang("money", userData.money)));
 	}
 };
