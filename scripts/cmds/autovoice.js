@@ -16,7 +16,6 @@ module.exports.handleEvent = async function ({ event, api }) {
   if (!event.body) return;
   const text = event.body.trim();
 
-  // ✅ Trigger only when message is exactly 😒
   if (text === "😒") {
     const filePath = path.join(__dirname, "..", "cache", "autovoice", "voice1.mp3");
     if (fs.existsSync(filePath)) {
@@ -25,4 +24,7 @@ module.exports.handleEvent = async function ({ event, api }) {
   }
 };
 
-module.exports.run = async () => {};
+// ✅ Add this empty onStart to fix error
+module.exports.onStart = async function () {
+  // no action needed here
+};
