@@ -4,26 +4,30 @@ const { getStreamFromURL } = global.utils;
 module.exports = {
   config: {
     name: "stalk",
-    version: "1.3",
+    version: "2.0",
     author: "Bayjid & ChatGPT",
-    shortDescription: { en: "FB stalk with photo and cover" },
+    shortDescription: { en: "Facebook stalk from UID or reply" },
     longDescription: { en: "View Facebook user info with photo attachments" },
     category: "tools",
-    guide: { en: "{pn} [UID or FB link] or reply to someone's message" }
+    guide: { en: "{pn} [UID or FB link] or reply to a user message" }
   },
 
   onStart: async function ({ message, args, event }) {
     let uid;
 
-    // If message is a reply, get senderID from replied message
+    // ✅ Auto detect UID from reply
     if (event.type === "message_reply") {
-      uid = event.messageReply.senderID;
-    } else if (args[0]) {
+      const replyUID = event.messageReply.senderID;
+      if (!replyUID) return message.reply("❌ Failed to get UID from replied message.");
+      uid = replyUID;
+    }
+    // ✅ UID or link from args
+    else if (args[0]) {
       uid = args[0].includes("facebook.com")
         ? args[0].split("/").pop().split("?")[0]
         : args[0];
     } else {
-      return message.reply("❌ Please provide a UID or reply to someone's message.");
+      return message.reply("❌ Please provide a UID/link or reply to a user's message.");
     }
 
     const api = `https://api-dien.kira1011.repl.co/stalk?uid=${uid}`;
@@ -35,32 +39,30 @@ module.exports = {
       const text = `
 🔍 𝗙𝗔𝗖𝗘𝗕𝗢𝗢𝗞 𝗦𝗧𝗔𝗟𝗞 𝗥𝗘𝗣𝗢𝗥𝗧
 ──────────────────────
-📁 𝗕𝗔𝗦𝗜𝗖 𝗜𝗡𝗙𝗢
 👤 Name: ${info.name}
-⚡ Fast Name: ${info.firstName}
+⚡ First Name: ${info.firstName}
 🆔 UID: ${info.uid}
-🔗 Username: ${info.username || "No username"}
-🌐 Profile Link: ${info.link}
-📅 Created: ${info.created_time || "No data"} || ${info.time || ""}
-☑️ Verified: ${info.is_verified ? "✅ Verified" : "❌ Not Verified"}
+🔗 Username: ${info.username || "None"}
+🌐 Profile: ${info.link}
+📅 Created: ${info.created_time || "N/A"} | ${info.time || ""}
+☑️ Verified: ${info.is_verified ? "✅ Yes" : "❌ No"}
 
-🧠 𝗣𝗘𝗥𝗦𝗢𝗡𝗔𝗟 𝗜𝗡𝗙𝗢
-🎂 Birthday: ${info.birthday || "No Data"}
-🗣️ Gender: ${info.gender || "No Data"}
-💘 Relationship: ${info.relationship_status || "No Data"}
+🎂 Birthday: ${info.birthday || "No data"}
+🗣️ Gender: ${info.gender || "No data"}
+💘 Relationship: ${info.relationship_status || "No data"}
 💋 Nickname: ${info.nicknames?.join(", ") || "None"}
-💭 Love Status: ${info.love || "No Data"}
-🧠 About: ${info.about || "No Data"}
-🧡 Quotes: ${info.quotes || "No Data"}
+🧠 About: ${info.about || "None"}
+💬 Quotes: ${info.quotes || "None"}
+💭 Love Status: ${info.love || "None"}
 
-🌍 𝗟𝗢𝗖𝗔𝗧𝗜𝗢𝗡 & 𝗪𝗘𝗕
-🏠 Hometown: ${info.hometown || "No Data"}
-📌 Locale: ${info.locale || "No Data"}
-🌐 Website: ${info.website || "No Data"}
+🌍 Location:
+🏠 Hometown: ${info.hometown || "N/A"}
+📌 Locale: ${info.locale || "N/A"}
+🌐 Website: ${info.website || "None"}
 
-📊 𝗦𝗢𝗖𝗜𝗔𝗟 𝗔𝗖𝗧𝗜𝗩𝗜𝗧𝗬
-👥 Followers: ${info.follow || "No Data"}
-🏢 Works At: ${info.work || "No Data"}
+📊 Social:
+👥 Followers: ${info.follow || "No data"}
+🏢 Works At: ${info.work || "No data"}
 ──────────────────────`.trim();
 
       const attachments = [];
@@ -68,20 +70,20 @@ module.exports = {
       if (info.profile_picture) {
         try {
           attachments.push(await getStreamFromURL(info.profile_picture));
-        } catch (e) {}
+        } catch {}
       }
 
       if (info.cover_photo) {
         try {
           attachments.push(await getStreamFromURL(info.cover_photo));
-        } catch (e) {}
+        } catch {}
       }
 
       message.reply({ body: text, attachment: attachments });
 
     } catch (err) {
-      console.log(err);
-      message.reply("❌ Failed to fetch data. Maybe UID is wrong or server is down.");
+      console.log("❌ STALK API ERROR:", err.message || err);
+      message.reply("❌ Failed to fetch data. Maybe UID is wrong or the server is down.");
     }
   }
 };
