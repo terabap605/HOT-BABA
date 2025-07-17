@@ -1,89 +1,46 @@
-const axios = require("axios");
-const { getStreamFromURL } = global.utils;
+const axios = require("axios"); const fs = require("fs-extra"); const path = require("path"); const { getStreamFromURL } = global.utils;
 
-module.exports = {
-  config: {
-    name: "stalk",
-    version: "2.0",
-    author: "Bayjid & ChatGPT",
-    shortDescription: { en: "Facebook stalk from UID or reply" },
-    longDescription: { en: "View Facebook user info with photo attachments" },
-    category: "tools",
-    guide: { en: "{pn} [UID or FB link] or reply to a user message" }
-  },
+module.exports = { config: { name: "stalk", version: "1.0", author: "ChatGPT & Bayjid", shortDescription: { en: "Facebook profile info by UID or reply" }, longDescription: { en: "Get Facebook profile info including name, followers, birthday, work, location, etc." }, category: "tools", guide: { en: "Use .stalk [uid] or reply to a user's message." } },
 
-  onStart: async function ({ message, args, event }) {
-    let uid;
+onStart: async function ({ api, event, args, message }) { let uid = args[0];
 
-    // ✅ Auto detect UID from reply
-    if (event.type === "message_reply") {
-      const replyUID = event.messageReply.senderID;
-      if (!replyUID) return message.reply("❌ Failed to get UID from replied message.");
-      uid = replyUID;
-    }
-    // ✅ UID or link from args
-    else if (args[0]) {
-      uid = args[0].includes("facebook.com")
-        ? args[0].split("/").pop().split("?")[0]
-        : args[0];
-    } else {
-      return message.reply("❌ Please provide a UID/link or reply to a user's message.");
-    }
+if (!uid && event.type === "message_reply") {
+  uid = event.messageReply.senderID;
+}
 
-    const api = `https://api-dien.kira1011.repl.co/stalk?uid=${uid}`;
+if (!uid) return message.reply("❌ Please reply to a message or provide a UID.");
 
-    try {
-      const res = await axios.get(api);
-      const info = res.data.result;
+const url = `https://facebook-tools-six.vercel.app/api/stalk?uid=${uid}`;
 
-      const text = `
-🔍 𝗙𝗔𝗖𝗘𝗕𝗢𝗢𝗞 𝗦𝗧𝗔𝗟𝗞 𝗥𝗘𝗣𝗢𝗥𝗧
-──────────────────────
-👤 Name: ${info.name}
-⚡ First Name: ${info.firstName}
-🆔 UID: ${info.uid}
-🔗 Username: ${info.username || "None"}
-🌐 Profile: ${info.link}
-📅 Created: ${info.created_time || "N/A"} | ${info.time || ""}
-☑️ Verified: ${info.is_verified ? "✅ Yes" : "❌ No"}
+try {
+  const res = await axios.get(url);
+  const data = res.data.result;
 
-🎂 Birthday: ${info.birthday || "No data"}
-🗣️ Gender: ${info.gender || "No data"}
-💘 Relationship: ${info.relationship_status || "No data"}
-💋 Nickname: ${info.nicknames?.join(", ") || "None"}
-🧠 About: ${info.about || "None"}
-💬 Quotes: ${info.quotes || "None"}
-💭 Love Status: ${info.love || "None"}
+  if (!data.name) return message.reply("❌ Failed to fetch data. UID may be private or invalid.");
 
-🌍 Location:
-🏠 Hometown: ${info.hometown || "N/A"}
-📌 Locale: ${info.locale || "N/A"}
-🌐 Website: ${info.website || "None"}
+  let text = `👤 𝗡𝗮𝗺𝗲: ${data.name}\n`;
+  text += `🆔 𝗨𝗜𝗗: ${uid}\n`;
+  text += data.follow || data.follow === 0 ? `👥 𝗙𝗼𝗹𝗹𝗼𝘄𝗲𝗿𝘀: ${data.follow}\n` : "";
+  text += data.birthday ? `🎂 𝗕𝗶𝗿𝘁𝗵𝗱𝗮𝘆: ${data.birthday}\n` : "";
+  text += data.relationship ? `❤️ 𝗥𝗲𝗹𝗮𝘁𝗶𝗼𝗻𝘀𝗵𝗶𝗽: ${data.relationship}\n` : "";
+  text += data.work ? `💼 𝗪𝗼𝗿𝗸: ${data.work}\n` : "";
+  text += data.location ? `📍 𝗟𝗼𝗰𝗮𝘁𝗶𝗼𝗻: ${data.location}\n` : "";
+  text += data.hometown ? `🏡 𝗛𝗼𝗺𝗲𝘁𝗼𝘄𝗻: ${data.hometown}\n` : "";
+  text += data.website ? `🔗 𝗪𝗲𝗯𝘀𝗶𝘁𝗲: ${data.website}\n` : "";
+  text += `📎 𝗣𝗿𝗼𝗳𝗶𝗹𝗲: https://facebook.com/${uid}`;
 
-📊 Social:
-👥 Followers: ${info.follow || "No data"}
-🏢 Works At: ${info.work || "No data"}
-──────────────────────`.trim();
+  const img1 = data.profileUrl;
+  const img2 = data.coverUrl;
+  const attachments = [];
 
-      const attachments = [];
+  if (img1) attachments.push(await getStreamFromURL(img1));
+  if (img2) attachments.push(await getStreamFromURL(img2));
 
-      if (info.profile_picture) {
-        try {
-          attachments.push(await getStreamFromURL(info.profile_picture));
-        } catch {}
-      }
+  return message.reply({ body: text, attachment: attachments });
+} catch (e) {
+  console.error(e);
+  return message.reply("❌ Error while fetching profile data.");
+}
 
-      if (info.cover_photo) {
-        try {
-          attachments.push(await getStreamFromURL(info.cover_photo));
-        } catch {}
-      }
+} };
 
-      message.reply({ body: text, attachment: attachments });
-
-    } catch (err) {
-      console.log("❌ STALK API ERROR:", err.message || err);
-      message.reply("❌ Failed to fetch data. Maybe UID is wrong or the server is down.");
-    }
-  }
-};
