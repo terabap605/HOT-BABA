@@ -1,6 +1,3 @@
-const fs = require("fs");
-const path = require("path");
-
 module.exports = {
   config: {
     name: "help",
@@ -8,17 +5,22 @@ module.exports = {
     version: "1.0",
     role: 0,
     shortDescription: { en: "Show command list" },
-    longDescription: { en: "Display bot command categories and how to use them" },
+    longDescription: { en: "Display all commands with categories" },
     category: "System",
     guide: { en: "{pn} [command name]" }
   },
 
-  onStart: async function ({ args, message, event, commandName }) {
-    const commands = global.GoatBot.commands;
-    const allCommands = Array.from(commands.values());
+  onStart: async function ({ args, message }) {
+    const allCommands = Array.from(global.GoatBot.commands.values());
+    const byCat = {};
 
-    // 🎥 Random tutorial videos
-    const tutorialVideos = [
+    allCommands.forEach(cmd => {
+      const cat = cmd.config.category || "Misc";
+      if (!byCat[cat]) byCat[cat] = [];
+      byCat[cat].push(cmd.config.name);
+    });
+
+    const vids = [
       "https://drive.google.com/uc?export=download&id=11mEAr6MneWy7IN-hBtK2M8SALAr3ZmrA",
       "https://drive.google.com/uc?export=download&id=1211JSbJp8ZCPHotZVd2RYz_ZaAUNJKAA",
       "https://drive.google.com/uc?export=download&id=120tokEDkjIcBGa_jhvFhduFD7oT-dWBg",
@@ -28,57 +30,42 @@ module.exports = {
       "https://drive.google.com/uc?export=download&id=11sjtrTekpZjyzTX9N89ewAuZoVF5mlBu",
       "https://drive.google.com/uc?export=download&id=11oZPK4XcpslKmgeyv3MjGJMbZ4GAF1H_"
     ];
-    const randomVideo = tutorialVideos[Math.floor(Math.random() * tutorialVideos.length)];
+    const vid = vids[Math.floor(Math.random() * vids.length)];
 
-    // 📌 Show help for a specific command
     if (args[0]) {
       const cmd = allCommands.find(c =>
-        c.config.name === args[0] || (c.config.aliases && c.config.aliases.includes(args[0]))
+        c.config.name === args[0] ||
+        (c.config.aliases && c.config.aliases.includes(args[0]))
       );
       if (!cmd) return message.reply("❌ Command not found.");
-
-      const { name, aliases, guide, description, version, role } = cmd.config;
+      const c = cmd.config;
       return message.reply({
-        body: `🎯 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗗𝗘𝗧𝗔𝗜𝗟𝗦 🎯\n━━━━━━━━━━━━━━━━\n📍 Name: ${name}\n🔁 Aliases: ${aliases?.join(", ") || "None"}\n📘 Usage: ${guide?.en || "N/A"}\n🧾 Description: ${description?.en || "N/A"}\n🔑 Role: ${role}\n📌 Version: ${version || "1.0"}\n━━━━━━━━━━━━━━━━`,
-        attachment: await global.utils.getStreamFromURL(randomVideo)
+        body: `🎯 *COMMAND DETAILS*\n━━━━━━━━━━\n📍 Name: ${c.name}\n🔁 Aliases: ${c.aliases?.join(", ") || "None"}\n📘 Usage: ${c.guide?.en || "N/A"}\n🧾 Desc: ${c.longDescription?.en || "N/A"}\n🔑 Role: ${c.role}\n📌 Version: ${c.version}\n━━━━━━━━━━`,
+        attachment: await global.utils.getStreamFromURL(vid)
       });
     }
 
-    // 📋 All commands help menu
-    const helpText = `
-💠═══════════════💠
-🎯 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗦𝗬𝗦𝗧𝗘𝗠 🎯
-💠═══════════════💠
+    let text = `✦ 𓆩 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗦𝗬𝗦𝗧𝗘𝗠 𓆪 ✦\n\n`;
+    for (let [cat, list] of Object.entries(byCat)) {
+      let icon = "🔹";
+      if (/AI/i.test(cat)) icon = "📌";
+      else if (/GROUP/i.test(cat)) icon = "👥";
+      else if (/TOOL/i.test(cat)) icon = "🛠️";
+      else if (/VIDEO/i.test(cat)) icon = "🎞️";
+      else if (/ANIME/i.test(cat)) icon = "🌸";
 
-📌 𝗔𝗜 & 𝗚𝗘𝗡𝗘𝗥𝗔𝗧𝗘 ✨
-┣⪼ 🔮 tm
-┣⪼ 🌀 gpt
-┣⪼ 🖼️ aiimage
+      text += `${icon} *${cat.toUpperCase()}*\n`;
+      list.sort().forEach(name => {
+        text += `├➤ ${name}\n`;
+      });
+      text += `\n`;
+    }
 
-👥 𝗚𝗥𝗢𝗨𝗣 & 𝗧𝗔𝗚 📢
-┣⪼ 👑 tagadmin
-┣⪼ 🧨 uchiha
-
-⚙️ 𝗧𝗢𝗢𝗟𝗦 & 𝗨𝗧𝗜𝗟𝗦 🛠️
-┣⪼ ⏱️ uptime
-┣⪼ 🌤️ weather
-┣⪼ 🕒 time
-
-🎞️ 𝗩𝗜𝗗𝗘𝗢 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 🎬
-┣⪼ 🔴 youtube
-┣⪼ 🎵 tiktokdl
-
-🌸 𝗔𝗡𝗜𝗠𝗘 𝗦𝗘𝗖𝗧𝗜𝗢𝗡 💮
-┣⪼ 💗 waifu
-┣⪼ 🧸 animequote
-
-💠 Use: -help [command]
-📽️ Tutorial auto-attached below
-`;
+    text += `🛠️ Use: -help [command]\n📽 Tutorial auto-attached below\n\n✦ 𓆩 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗦𝗬𝗦𝗧𝗘𝗠 𓆪 ✦`;
 
     return message.reply({
-      body: helpText.trim(),
-      attachment: await global.utils.getStreamFromURL(randomVideo)
+      body: text,
+      attachment: await global.utils.getStreamFromURL(vid)
     });
   }
 };
