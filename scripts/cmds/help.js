@@ -4,7 +4,6 @@ const path = require("path");
 const { getPrefix } = global.utils;
 const { commands, aliases } = global.GoatBot;
 
-// Video IDs from Google Drive
 const VIDEO_IDS = [
   "1-1iSV2SyuP3TEH8IVkLIGN0_MQ8cVYjm",
   "1-ubkubbvyNcMi4a1HDa0Zl0FtjK_Hbvx",
@@ -14,127 +13,80 @@ const VIDEO_IDS = [
 ];
 
 module.exports = {
-  config: Object.freeze({
+  config: {
     name: "help",
-    version: "1.35",
-    author: "BaYjid",
-    countDown: 5,
+    version: "1.5",
     role: 0,
-    shortDescription: { en: "📖 View command usage + tutorial video" },
-    longDescription: { en: "📜 View command usage and get tutorial video directly" },
-    category: "ℹ️ Info",
-    guide: { en: "🔹 {pn}help cmdName" },
-    priority: 1,
-  }),
+    shortDescription: { en: "⚜️ Stylish bot command list with video" },
+    longDescription: { en: "Shows unique styled help list with random tutorial video" },
+    category: "info",
+    guide: { en: "{pn} [command]" },
+  },
 
-  onStart: async function ({ message, args, event, role }) {
-    const { threadID } = event;
-    const prefix = getPrefix(threadID);
-    let filterAuthor = null;
-    let filterCategory = null;
-
-    // Select a random video id and its URL
+  onStart: async function ({ args, message, event, role }) {
+    const prefix = getPrefix(event.threadID);
     const randId = VIDEO_IDS[Math.floor(Math.random() * VIDEO_IDS.length)];
     const videoUrl = `https://drive.google.com/uc?export=download&id=${randId}`;
     const videoPath = path.join(__dirname, "cache", `help_video_${randId}.mp4`);
 
-    if (args[0] === "-a" && args[1]) {
-      filterAuthor = args.slice(1).join(" ").toLowerCase();
-    } else if (args[0] === "-c" && args[1]) {
-      filterCategory = args.slice(1).join(" ").toLowerCase();
-    } else if (args.length > 0 && !args[0].startsWith("-")) {
-      // Show details of a specific command
-      const commandName = args[0].toLowerCase();
-      const command = commands.get(commandName) || commands.get(aliases.get(commandName));
-      if (!command) return message.reply(`❌ Command "${commandName}" not found.`);
-
-      const config = command.config;
-      const roleText = roleTextToString(config.role);
-      const usage = (config.guide?.en || "No guide available.")
-        .replace(/{pn}/g, prefix)
-        .replace(/{n}/g, config.name);
-
-      // Download video and send with details
+    async function sendStylish(body) {
       try {
         const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
         fs.ensureDirSync(path.dirname(videoPath));
-        fs.writeFileSync(videoPath, Buffer.from(res.data, "binary"));
-
-        return message.reply({
-          body:
-            `╔═━「 🦋 COMMAND DETAILS 」━═╗\n` +
-            `🧸 Name: ${config.name}\n` +
-            `📜 Desc: ${config.longDescription?.en || "No description"}\n` +
-            `🔁 Aliases: ${config.aliases?.join(", ") || "None"}\n` +
-            `📦 Version: ${config.version || "1.0"}\n` +
-            `🛡️ Role: ${roleText}\n` +
-            `⏳ Cooldown: ${config.countDown || 1}s\n` +
-            `👑 Author: ${config.author || "Unknown"}\n` +
-            `📘 Usage: ${usage}\n` +
-            `╚════════════════════╝`,
-          attachment: fs.createReadStream(videoPath),
-        }, () => fs.unlinkSync(videoPath));
-      } catch (e) {
-        console.error("Video download error:", e.message);
-        return message.reply("❌ Couldn't load help video. Try again later.");
+        fs.writeFileSync(videoPath, res.data);
+        await message.reply({ body, attachment: fs.createReadStream(videoPath) },
+          () => fs.unlinkSync(videoPath));
+      } catch {
+        await message.reply(body);
       }
     }
 
-    // Otherwise show full command list + video
-    const categories = {};
-    let total = 0;
+    if (args[0]) {
+      const name = args[0].toLowerCase();
+      const cmd = commands.get(name) || commands.get(aliases.get(name));
+      if (!cmd) return message.reply(`❌ Command "${name}" not found.`);
 
-    for (const [name, command] of commands) {
-      const config = command.config;
-      if (config.role > 1 && role < config.role) continue;
-      if (filterAuthor && config.author?.toLowerCase() !== filterAuthor) continue;
-      if (filterCategory && config.category?.toLowerCase() !== filterCategory) continue;
+      const cfg = cmd.config;
+      const usage = (cfg.guide?.en || "").replace("{pn}", prefix);
+      const detail = `
+╔═══❖•ೋ° °ೋ•❖═══╗
+🌟 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗜𝗡𝗙𝗢 🌟
+╚═══❖•ೋ° °ೋ•❖═══╝
 
-      const category = config.category || "Uncategorized";
-      if (!categories[category]) categories[category] = [];
-      categories[category].push(name);
-      total++;
+🔸 𝗡𝗮𝗺𝗲: ${cfg.name}
+🔹 𝗩𝗲𝗿𝘀𝗶𝗼𝗻: ${cfg.version}
+📁 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${cfg.category?.toUpperCase() || "UNCATEGORIZED"}
+📖 𝗗𝗲𝘀𝗰: ${cfg.shortDescription?.en || "N/A"}
+🛠️ 𝗨𝘀𝗮𝗴𝗲: ${usage || prefix + cfg.name}
+
+📽️ 𝗧𝘂𝘁𝗼𝗿𝗶𝗮𝗹 𝗩𝗶𝗱𝗲𝗼 𝗕𝗲𝗹𝗼𝘄...
+━━━━━━━━━━━━━━━━━━━━━━━
+`.trim();
+
+      return sendStylish(detail);
     }
 
-    if (total === 0) {
-      const filterMsg = filterAuthor ? `author "${filterAuthor}"` : `category "${filterCategory}"`;
-      return message.reply(`🚫 No commands found for ${filterMsg}.`);
+    const categorized = {};
+    for (const cmd of commands.values()) {
+      if (cmd.config.role > role) continue;
+      const cat = (cmd.config.category || "Uncategorized").toUpperCase();
+      (categorized[cat] = categorized[cat] || []).push(cmd.config.name);
     }
 
-    let msg = `🌸 MALVINA BOT MENU 🌸\n`;
+    let text = `
+╔═════════════════════╗
+🎀 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗕𝗢𝗧 𝗛𝗘𝗟𝗣 🎀
+╚═════════════════════╝
 
-    Object.keys(categories).sort().forEach(category => {
-      msg += `\n🕷️ Category: ${category.toUpperCase()}\n`;
-      categories[category].sort().forEach(cmd => {
-        msg += `⤷ 🎟️ Cmd: ${cmd}\n`;
-      });
-    });
+`.trim();
 
-    msg += `\n🌐 Total Commands: ${total}`;
-    msg += `\n🔍 Tip: ${prefix}help <command> for details`;
-
-    // Download video and send message + attachment
-    try {
-      const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
-      fs.ensureDirSync(path.dirname(videoPath));
-      fs.writeFileSync(videoPath, Buffer.from(res.data, "binary"));
-
-      await message.reply({
-        body: msg,
-        attachment: fs.createReadStream(videoPath),
-      }, () => fs.unlinkSync(videoPath));
-    } catch (e) {
-      console.error("Video download error:", e.message);
-      return message.reply(msg);
+    for (const cat of Object.keys(categorized).sort()) {
+      text += `✨ 𝗖𝗔𝗧𝗘𝗚𝗢𝗥𝗬: ${cat} ✨\n`;
+      text += categorized[cat].sort().map(cmd => `🔹 ${cmd}`).join("\n") + "\n\n";
     }
-  },
-};
 
-function roleTextToString(role) {
-  switch (role) {
-    case 0: return "🌍 All Users";
-    case 1: return "👑 Group Admins";
-    case 2: return "🤖 Bot Admins";
-    default: return "❓ Unknown";
+    text += `💡 𝗨𝘀𝗲: "${prefix}help [command]" for full details.\n🎬 𝗧𝘂𝘁𝗼𝗿𝗶𝗮𝗹 𝗩𝗶𝗱𝗲𝗼 𝗔𝘁𝘁𝗮𝗰𝗵𝗲𝗱...`;
+
+    return sendStylish(text);
   }
-}
+};
