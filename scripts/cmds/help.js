@@ -1,91 +1,104 @@
+const axios = require("axios");
+const fs = require("fs-extra");
+const path = require("path");
+const { getPrefix } = global.utils;
+const { commands, aliases } = global.GoatBot;
+
 module.exports = {
   config: {
     name: "help",
-    aliases: ["menu", "cmd", "commands"],
-    version: "1.1",
+    version: "4.3",
+    author: "Mostakim + ChatGPT",
+    usePrefix: false,
     role: 0,
-    shortDescription: { en: "Show Rahad Bot's command list" },
-    longDescription: { en: "Stylish and categorized help menu for Rahad Bot" },
-    category: "System",
-    guide: { en: "{pn} [command name]" }
+    category: "info",
+    priority: 1
   },
 
-  onStart: async function ({ args, message }) {
-    const allCommands = Array.from(global.GoatBot.commands.values());
-    const byCategory = {};
+  onStart: async function({ message, args, event, role }) {
+    const prefix = getPrefix(event.threadID) || ".";
+    const arg = args[0]?.toLowerCase();
 
-    for (const cmd of allCommands) {
-      const cat = cmd.config.category?.toUpperCase() || "UNCATEGORIZED";
-      if (!byCategory[cat]) byCategory[cat] = [];
-      byCategory[cat].push(cmd.config.name);
-    }
+    const header = "╔═━「 🛠️ 𝗛𝗘𝗟𝗣 𝗠𝗘𝗡𝗨 」━═╗";
+    const footer = "╚═━──────────────━═╝";
 
-    const categoryStyle = {
-      "AI": "📌 ✦ 𝗔𝗜 & 𝗚𝗘𝗡𝗘𝗥𝗔𝗧𝗘 ✨",
-      "GROUP": "📢 ✦ 𝗚𝗥𝗢𝗨𝗣 & 𝗧𝗔𝗚 📣",
-      "TOOLS": "🛠️ ✦ 𝗧𝗢𝗢𝗟𝗦 & 𝗨𝗧𝗜𝗟𝗦 🔧",
-      "TOOL": "🛠️ ✦ 𝗧𝗢𝗢𝗟𝗦 & 𝗨𝗧𝗜𝗟𝗦 🔧",
-      "VIDEO": "🎬 ✦ 𝗩𝗜𝗗𝗘𝗢 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥𝗦 🎥",
-      "ANIME": "🌸 ✦ 𝗔𝗡𝗜𝗠𝗘 𝗦𝗘𝗖𝗧𝗜𝗢𝗡 🌸",
-      "OTHER": "🌐 ✦ 𝗢𝗧𝗛𝗘𝗥 𝗙𝗘𝗔𝗧𝗨𝗥𝗘𝗦 🧩",
-      "SYSTEM": "⚙️ ✦ 𝗦𝗬𝗦𝗧𝗘𝗠 ⚙️",
-      "UNCATEGORIZED": "📂 ✦ 𝗢𝗧𝗛𝗘𝗥𝗦 📂"
-    };
-
-    const cmdIcons = {
-      "uptime": "🕒", "weather": "🌤️", "time": "🕰️",
-      "youtube": "🔴", "tiktokdl": "🎵",
-      "waifu": "💗", "animequote": "🧸",
-      "brain": "🧠", "quote": "💌", "stalk": "😎",
-      "autotimer": "📅", "voiceme": "🎙️", "info": "👤", "vip": "🌈",
-      "tagadmin": "👑", "uchiha": "💥",
-      "gpt": "🌀", "tm": "🪐", "aiimage": "🖼️"
-    };
-
-    // if specific command
-    if (args[0]) {
-      const cmd = allCommands.find(c => c.config.name === args[0] || c.config.aliases?.includes(args[0]));
-      if (!cmd) return message.reply("❌ Command not found.");
-      const c = cmd.config;
-      return message.reply(
-        `🎯 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗗𝗘𝗧𝗔𝗜𝗟𝗦\n━━━━━━━━━━━━━━\n📌 Name: ${c.name}\n🔁 Aliases: ${c.aliases?.join(", ") || "None"}\n📘 Description: ${c.shortDescription?.en || "N/A"}\n🧾 Usage: ${c.guide?.en || "N/A"}\n🏷️ Category: ${c.category || "Uncategorized"}\n🔑 Role: ${c.role}\n📎 Version: ${c.version}\n━━━━━━━━━━━━━━`
-      );
-    }
-
-    // full help menu
-    let text = `✦ 𓆩 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗠𝗔𝗦𝗧𝗘𝗥 𝗠𝗘𝗡𝗨 𓆪 ✦\n\n`;
-
-    for (const [cat, cmds] of Object.entries(byCategory)) {
-      const styledCat = categoryStyle[cat] || `📁 ✦ ${cat} 📁`;
-      text += `${styledCat}\n`;
-      const sorted = cmds.sort((a, b) => a.localeCompare(b));
-      for (const name of sorted) {
-        const icon = cmdIcons[name] || "➤";
-        text += `├➤ ${icon} ${name}\n`;
-      }
-      text += `\n`;
-    }
-
-    text += `📚 Type: -help [command name] to see usage\n📎 Auto tutorial video below ⬇️`;
-
-    const tutorialVideos = [
-      "https://drive.google.com/uc?export=download&id=11mEAr6MneWy7IN-hBtK2M8SALAr3ZmrA",
-      "https://drive.google.com/uc?export=download&id=1211JSbJp8ZCPHotZVd2RYz_ZaAUNJKAA",
-      "https://drive.google.com/uc?export=download&id=120tokEDkjIcBGa_jhvFhduFD7oT-dWBg",
-      "https://drive.google.com/uc?export=download&id=12-_VJ6ol664m2q3TuXA3TXkPIyGr08dv",
-      "https://drive.google.com/uc?export=download&id=13OZg_BRv8THc9PMLZ92z4DJ7W_63mFzg",
-      "https://drive.google.com/uc?export=download&id=1VoFx60BzUmPY3J0PltTjlnijD8-MdvGL",
-      "https://drive.google.com/uc?export=download&id=1ZjDPV4OJw3HwZYZApLPWXRjvw9JZMKC6",
-      "https://drive.google.com/uc?export=download&id=1bfvvTTC9t_2vIUsIBj7dcE1np7_RwYLC",
-      "https://drive.google.com/uc?export=download&id=11sjtrTekpZjyzTX9N89ewAuZoVF5mlBu",
-      "https://drive.google.com/uc?export=download&id=11oZPK4XcpslKmgeyv3MjGJMbZ4GAF1H_"
+    const videoIds = [
+      "1211JSbJp8ZCPHotZVd2RYz_ZaAUNJKAA",
+      "11oZPK4XcpslKmgeyv3MjGJMbZ4GAF1H_",
+      "120tokEDkjIcBGa_jhvFhduFD7oT-dWBg",
+      "11xGxSGsywOGA13ZAD1TJ-eYSANgsl7w-",
+      "11z0xo_DnszJErPZNNjrNt8VOjY1FPw3E",
+      "11sjtrTekpZjyzTX9N89ewAuZoVF5mlBu",
+      "12-_VJ6ol664m2q3TuXA3TXkPIyGr08dv",
+      "11mEAr6MneWy7IN-hBtK2M8SALAr3ZmrA"
     ];
+    const randomVideoId = videoIds[Math.floor(Math.random() * videoIds.length)];
+    const videoUrl = `https://drive.google.com/uc?export=download&id=${randomVideoId}`;
+    const tmpVideo = path.join(__dirname, "cache", "help_video.mp4");
 
-    const randVid = tutorialVideos[Math.floor(Math.random() * tutorialVideos.length)];
+    if (!arg) {
+      const list = Array.from(commands.entries())
+        .filter(([_, cmd]) => cmd.config?.role <= role)
+        .map(([name]) => `┃ ✦ 〘 ${name} 〙`)
+        .sort()
+        .join("\n");
 
-    return message.reply({
-      body: text,
-      attachment: await global.utils.getStreamFromURL(randVid)
-    });
+      var replyText =
+        `${header}\n` +
+        `┃ ✧ 𝗣𝗿𝗲𝗳𝗶𝘅 ➜ ${prefix}\n` +
+        `┃ ✧ 𝗧𝗼𝘁𝗮𝗹 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀 ➜ ${commands.size}\n` +
+        `┃ ✧ 𝗔𝘃𝗮𝗶𝗹𝗮𝗯𝗹𝗲 𝗖𝗼𝗺𝗺𝗮𝗻𝗱𝘀:\n` +
+        `${list}\n` +
+        `${footer}\n\n` +
+        `🌟 𝗨𝘀𝗲: \`${prefix}help -<category>\` to filter by category\n` +
+        `📘 𝗨𝘀𝗲: \`${prefix}help <command>\` to view command details`;
+    } else if (arg.startsWith("-")) {
+      const category = arg.slice(1);
+      const matched = Array.from(commands.entries())
+        .filter(([_, cmd]) => cmd.config.category?.toLowerCase() === category && cmd.config.role <= role)
+        .map(([name]) => `┃ ✦ 〘 ${name} 〙`);
+      if (matched.length === 0) return message.reply(`🚫 No commands found in category "${category}".`);
+
+      var replyText =
+        `╔═━「 📂 CATEGORY: ${category.toUpperCase()} 」━═╗\n` +
+        `${matched.join("\n")}\n` +
+        `${footer}\n\n` +
+        `📘 Use \`${prefix}help <command>\` for more details`;
+    } else {
+      const cmd = commands.get(arg) || commands.get(aliases.get(arg));
+      if (!cmd || cmd.config.role > role) return message.reply(`🚫 Command "${arg}" not found or access denied.`);
+
+      const info = cmd.config;
+      const guide = info.guide?.en || "No usage info.";
+      const desc = info.longDescription?.en || "No description available.";
+
+      var replyText =
+        `╔═━「 🔎 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗗𝗘𝗧𝗔𝗜𝗟𝗦 」━═╗\n` +
+        `┃ 🧩 𝗡𝗮𝗺𝗲: ${info.name}\n` +
+        `┃ 🗒️ 𝗗𝗲𝘀𝗰𝗿𝗶𝗽𝘁𝗶𝗼𝗻: ${desc}\n` +
+        `┃ 📌 𝗨𝘀𝗮𝗴𝗲: ${guide.replace(/{p}/g, prefix).replace(/{n}/g, info.name)}\n` +
+        `┃ 🛡️ 𝗥𝗼𝗹𝗲 𝗥𝗲𝗾𝘂𝗶𝗿𝗲𝗱: ${info.role}\n` +
+        `┃ 📁 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${info.category || "Uncategorized"}\n` +
+        `${footer}`;
+    }
+
+    try {
+      const res = await axios.get(videoUrl, { responseType: "stream" });
+      await fs.ensureDir(path.dirname(tmpVideo));
+      const writer = fs.createWriteStream(tmpVideo);
+      res.data.pipe(writer);
+      await new Promise((res2, rej) => {
+        writer.on("finish", res2);
+        writer.on("error", rej);
+      });
+
+      await message.reply(
+        { body: replyText, attachment: fs.createReadStream(tmpVideo) },
+        () => fs.unlinkSync(tmpVideo)
+      );
+    } catch (e) {
+      console.error("Video error:", e);
+      return message.reply(replyText);
+    }
   }
 };
