@@ -1,76 +1,95 @@
 const axios = require("axios");
-const fs = require("fs");
-const { shortenURL } = global.utils;
+const fs = require("fs-extra");
+
 const baseApiUrl = async () => {
-  const base = await axios.get(
-    `https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`,
-  );
+  const base = await axios.get(`https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`);
   return base.data.api;
 };
 
-module.exports = {
-  config: {
-    name: "autodl",
-    version: "1.0.1",
-    author: "Dipto",
-    countDown: 0,
-    role: 0,
-    description: {
-      en: "Auto download video from tiktok, facebook, Instagram, YouTube, and more",
-    },
-    category: "media",
-    guide: {
-      en: "[video_link]",
-    },
+const config = {
+  name: "autodl",
+  version: "2.0",
+  author: "Father Rahad",
+  credits: "Dipto Modified by Rahad",
+  description: "Auto download video from TikTok, Facebook, Instagram, YouTube, and more",
+  category: "media",
+  commandCategory: "media",
+  usePrefix: true,
+  prefix: true,
+  dependencies: {
+    "fs-extra": "",
   },
-  onStart: async function () {},
-  onChat: async function ({ api, event }) {
-    let dipto = event.body ? event.body : "";
+};
 
-    try {
-      if (
-        dipto.startsWith("https://vt.tiktok.com") ||
-        dipto.startsWith("https://www.tiktok.com/") ||
-        dipto.startsWith("https://www.facebook.com") ||
-        dipto.startsWith("https://www.instagram.com/") ||
-        dipto.startsWith("https://youtu.be/") ||
-        dipto.startsWith("https://youtube.com/") ||
-        dipto.startsWith("https://x.com/") ||
-        dipto.startsWith("https://twitter.com/") ||
-        dipto.startsWith("https://vm.tiktok.com") ||
-        dipto.startsWith("https://fb.watch")
-      ) {
-        api.setMessageReaction("⏳", event.messageID, (err) => {}, true);
+const onStart = () => {};
 
-        const path = __dirname + `/cache/diptoo.mp4`;
-          if(!fs.existsSync(path)){
-        fs.mkdir(__dirname + '/cache');
+const onChat = async ({ api, event }) => {
+  let dipto = event.body || "", ex, cp;
+  try {
+    if (
+      dipto.startsWith("https://vt.tiktok.com") ||
+      dipto.startsWith("https://www.tiktok.com/") ||
+      dipto.startsWith("https://www.facebook.com") ||
+      dipto.startsWith("https://www.instagram.com/") ||
+      dipto.startsWith("https://youtu.be/") ||
+      dipto.startsWith("https://youtube.com/") ||
+      dipto.startsWith("https://x.com/") ||
+      dipto.startsWith("https://www.instagram.com/p/") ||
+      dipto.startsWith("https://pin.it/") ||
+      dipto.startsWith("https://twitter.com/") ||
+      dipto.startsWith("https://vm.tiktok.com") ||
+      dipto.startsWith("https://fb.watch")
+    ) {
+      api.setMessageReaction("⌛", event.messageID, {}, true);
+      const w = await api.sendMessage("⏳ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝗯𝗮𝗯𝘆... 😘", event.threadID);
+
+      const response = await axios.get(`${await baseApiUrl()}/alldl?url=${encodeURIComponent(dipto)}`);
+      const d = response.data;
+
+      if (d.result.includes(".jpg")) {
+        ex = ".jpg"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else if (d.result.includes(".png")) {
+        ex = ".png"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else if (d.result.includes(".jpeg")) {
+        ex = ".jpeg"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else {
+        ex = ".mp4"; cp = "🎬 𝗩𝗶𝗱𝗲𝗼 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗱 💞";
       }
-        const { data } = await axios.get(
-          `${await baseApiUrl()}/alldl?url=${encodeURIComponent(dipto)}`,
-        );
-        const vid = (
-          await axios.get(data.result, { responseType: "arraybuffer" })
-        ).data;
 
-        fs.writeFileSync(path, Buffer.from(vid, "utf-8"));
-        const url = await shortenURL(data.result);
-        api.setMessageReaction("✅", event.messageID, (err) => {}, true);
+      const path = __dirname + `/cache/video${ex}`;
+      fs.writeFileSync(path, Buffer.from((await axios.get(d.result, { responseType: "arraybuffer" })).data, "binary"));
 
-        api.sendMessage(
-          {
-            body: `${data.cp || null}\n✅ | Link: ${url || null}`,
+      const tinyUrlResponse = await axios.get(`https://tinyurl.com/api-create.php?url=${d.result}`);
+      const shortLink = tinyUrlResponse.data;
 
-            attachment: fs.createReadStream(path),
-          },
-          event.threadID,
-          () => fs.unlinkSync(path),
-          event.messageID,
-        );
-      }
-    } catch (e) {
-      api.setMessageReaction("❎", event.messageID, (err) => {}, true);
-      api.sendMessage(e, event.threadID, event.messageID);
+      api.setMessageReaction("✅", event.messageID, {}, true);
+      api.unsendMessage(w.messageID);
+
+      await api.sendMessage({
+        body: `
+╭─〔 👑 𝗙𝗔𝗧𝗛𝗘𝗥 𝗥𝗔𝗛𝗔𝗗 𝗗𝗟 𝗦𝗬𝗦𝗧𝗘𝗠 👑 〕─╮
+
+${cp}
+
+📎 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 𝗟𝗜𝗡𝗞:
+${shortLink}
+
+🔰 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 💚
+╰─────────────⭓`,
+        attachment: fs.createReadStream(path)
+      }, event.threadID, () => fs.unlinkSync(path), event.messageID);
     }
-  },
+  } catch (err) {
+    api.setMessageReaction("❌", event.messageID, {}, true);
+    console.log(err);
+    api.sendMessage(`❌ 𝗘𝗿𝗿𝗼𝗿: ${err.message}`, event.threadID, event.messageID);
+  }
+};
+
+module.exports = {
+  config,
+  onChat,
+  onStart,
+  run: onStart,
+  handleEvent: onChat,
 };
