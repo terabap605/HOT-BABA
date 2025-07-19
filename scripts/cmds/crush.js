@@ -1,53 +1,87 @@
 const fs = require("fs-extra");
 const axios = require("axios");
-const jimp = require("jimp");
 const path = require("path");
+const Canvas = require("canvas");
 
-module.exports = {
-  config: {
-    name: "crush",
-    version: "1.1",
-    author: "RAHAD",
-    role: 0,
-    shortDescription: { en: "Make a crush image" },
-    longDescription: { en: "Generate crush styled image with your dp and other's" },
-    category: "image",
-    guide: { en: "{pn} @tag" }
+module.exports.config = {
+  name: "crush",
+  version: "1.0",
+  author: "Rahad",
+  countDown: 5,
+  role: 0,
+  shortDescription: {
+    en: "Create a crush image with your and tagged user's profile picture"
   },
+  longDescription: {
+    en: "Make a cute Your Crush image with profile photos"
+  },
+  category: "image",
+  guide: {
+    en: "{pn} @mention"
+  }
+};
 
-  onStart: async function ({ message, event, api, usersData }) {
-    const mention = Object.keys(event.mentions)[0];
-    if (!mention) return message.reply("❌ | Tag your crush first!");
+module.exports.run = async function ({ api, event }) {
+  const mention = Object.keys(event.mentions)[0];
+  if (!mention)
+    return api.sendMessage("❤️ Please mention someone to crush on!", event.threadID);
 
-    const one = event.senderID;
-    const two = mention;
+  const senderID = event.senderID;
+  const targetID = mention;
 
-    const name1 = await usersData.getName(one);
-    const name2 = await usersData.getName(two);
+  const bgPath = path.join(__dirname, "..", "..", "cache", "crush.png");
+  if (!fs.existsSync(bgPath))
+    return api.sendMessage("❌ crush.png not found in /scripts/cmds/cache/", event.threadID);
 
-    const avatar1 = `https://graph.facebook.com/${one}/picture?width=512&height=512`;
-    const avatar2 = `https://graph.facebook.com/${two}/picture?width=512&height=512`;
+  const getAvatar = async (uid) => {
+    const url = `https://graph.facebook.com/${uid}/picture?height=512&width=512&access_token=350685531728|62f8ce9f74b12f84c123cc23437a4a32`;
+    const pathImg = path.join(__dirname, `tmp_${uid}.png`);
+    const res = await axios.get(url, { responseType: "arraybuffer" });
+    fs.writeFileSync(pathImg, res.data);
+    const img = await Canvas.loadImage(pathImg);
+    fs.unlinkSync(pathImg);
+    return img;
+  };
 
-    const img1 = await jimp.read((await axios.get(avatar1, { responseType: "arraybuffer" })).data);
-    const img2 = await jimp.read((await axios.get(avatar2, { responseType: "arraybuffer" })).data);
-    const bg = await jimp.read(path.join(__dirname, "cache", "crush.png"));
+  try {
+    const canvas = Canvas.createCanvas(736, 414);
+    const ctx = canvas.getContext("2d");
 
-    img1.resize(170, 170).circle();
-    img2.resize(170, 170).circle();
+    const background = await Canvas.loadImage(bgPath);
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-    bg.composite(img1, 180, 200);
-    bg.composite(img2, 490, 200);
+    const senderAvatar = await getAvatar(senderID);
+    const targetAvatar = await getAvatar(targetID);
 
-    const font = await jimp.loadFont(jimp.FONT_SANS_32_WHITE);
-    bg.print(font, 170, 400, name1);
-    bg.print(font, 480, 400, name2);
+    // Sender's profile (left circle)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(140, 215, 85, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(senderAvatar, 55, 130, 170, 170);
+    ctx.restore();
 
-    const imgPath = path.join(__dirname, "cache", `crush-${one}-${two}.png`);
-    await bg.writeAsync(imgPath);
+    // Mentioned user's profile (right circle)
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(590, 215, 85, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(targetAvatar, 505, 130, 170, 170);
+    ctx.restore();
 
-    return message.reply({
-      body: `💘 | ${name1} + ${name2} = Crush confirmed!`,
-      attachment: fs.createReadStream(imgPath)
-    }, () => fs.unlinkSync(imgPath));
+    const finalPath = path.join(__dirname, `crush_result_${Date.now()}.png`);
+    fs.writeFileSync(finalPath, canvas.toBuffer());
+
+    const msg = {
+      body: `💘 ${event.senderID == senderID ? "You" : "Someone"} is crushing on ${event.mentions[mention]}!`,
+      attachment: fs.createReadStream(finalPath)
+    };
+
+    api.sendMessage(msg, event.threadID, () => fs.unlinkSync(finalPath), event.messageID);
+  } catch (e) {
+    console.error(e);
+    return api.sendMessage("❌ Error while creating your crush image.", event.threadID);
   }
 };
