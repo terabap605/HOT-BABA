@@ -1,101 +1,58 @@
 const fs = require("fs-extra");
 const axios = require("axios");
 const path = require("path");
-const jimp = global.nodemodule["jimp"];
+const jimp = require("jimp");
 
 module.exports = {
   config: {
     name: "crush",
-    aliases: [],
     version: "1.0",
-    author: "Priyansh Rajput + Fixed by RAHAD",
-    countDown: 5,
+    author: "Rahad",
     role: 0,
-    shortDescription: {
-      en: "Make a photo with your crush 💞"
-    },
-    longDescription: {
-      en: "Mention someone and get a cute couple image with them"
-    },
+    shortDescription: { en: "Show crush love photo" },
+    longDescription: { en: "Generate a crush image with your and their avatar" },
     category: "fun",
-    guide: {
-      en: "{pn} @mention"
-    }
+    guide: { en: "{pn} @mention" }
   },
 
-  onLoad: async () => {
-    const dir = path.join(__dirname, "cache", "canvas");
-    const imgPath = path.join(dir, "crush.png");
+  onStart: async function ({ message, event, usersData, api, args }) {
+    try {
+      const mention = Object.keys(event.mentions)[0];
+      if (!mention) return message.reply("❌ | Please mention someone to crush on 💔");
 
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      const one = event.senderID;
+      const two = mention;
 
-    if (!fs.existsSync(imgPath)) {
-      const imgData = (
-        await axios.get("https://i.imgur.com/PlVBaM1.jpg", {
-          responseType: "arraybuffer"
-        })
-      ).data;
-      fs.writeFileSync(imgPath, imgData);
+      const userOneAvatar = `https://graph.facebook.com/${one}/picture?width=512&height=512`;
+      const userTwoAvatar = `https://graph.facebook.com/${two}/picture?width=512&height=512`;
+
+      const [avatarOne, avatarTwo] = await Promise.all([
+        jimp.read((await axios.get(userOneAvatar, { responseType: "arraybuffer" })).data),
+        jimp.read((await axios.get(userTwoAvatar, { responseType: "arraybuffer" })).data)
+      ]);
+
+      const base = await jimp.read("https://i.imgur.com/fkRAT0N.jpg"); // 🔄 Change background if needed
+      avatarOne.circle();
+      avatarTwo.circle();
+
+      base.resize(800, 600);
+      avatarOne.resize(150, 150);
+      avatarTwo.resize(150, 150);
+
+      base.composite(avatarOne, 170, 220);
+      base.composite(avatarTwo, 480, 220);
+
+      const tempPath = path.join(__dirname, "cache", `crush_${one}_${two}.png`);
+      await base.writeAsync(tempPath);
+
+      message.reply({
+        body: `💘 𝐂𝐑𝐔𝐒𝐇 𝐌𝐎𝐌𝐄𝐍𝐓 💘\n💖 ${event.senderID} + ${mention} 💖`,
+        attachment: fs.createReadStream(tempPath)
+      }, () => fs.unlinkSync(tempPath));
+
+    } catch (err) {
+      console.error(err);
+      return message.reply("❌ | Error creating crush image. Try again later.");
     }
-  },
-
-  onStart: async function ({ message, event }) {
-    const mention = Object.keys(event.mentions);
-    if (mention.length === 0)
-      return message.reply("😅 Please mention someone to make them your crush!");
-
-    const senderID = event.senderID;
-    const mentionedID = mention[0];
-
-    const imagePath = await createCrushImage({ one: senderID, two: mentionedID });
-
-    return message.reply({
-      body:
-        "✧•❁𝐂𝐫𝐮𝐬𝐡❁•✧\n\n" +
-        "╔═══❖••° °••❖═══╗\n" +
-        "  💘 𝐒𝐮𝐜𝐜𝐞𝐬𝐬𝐟𝐮𝐥 𝐏𝐚𝐢𝐫𝐢𝐧𝐠 💘\n" +
-        "╚═══❖••° °••❖═══╝\n\n" +
-        "     👑 𝐘𝐄 𝐋𝐄 𝐏𝐀𝐊𝐀𝐃 💖\n" +
-        "     𝐀𝐏𝐍𝐄 𝐂𝐑𝐔𝐒𝐇 𝐊𝐎 🩷",
-      attachment: fs.createReadStream(imagePath)
-    }, () => fs.unlinkSync(imagePath));
   }
 };
-
-async function circle(imagePath) {
-  const img = await jimp.read(imagePath);
-  img.circle();
-  return await img.getBufferAsync("image/png");
-}
-
-async function createCrushImage({ one, two }) {
-  const dir = path.join(__dirname, "cache", "canvas");
-  const bgPath = path.join(dir, "crush.png");
-  const outPath = path.join(dir, `crush_${one}_${two}.png`);
-  const avatar1Path = path.join(dir, `avt_${one}.png`);
-  const avatar2Path = path.join(dir, `avt_${two}.png`);
-
-  const getAvatar = async (uid, savePath) => {
-    const url = `https://graph.facebook.com/${uid}/picture?width=512&height=512&access_token=6628568379|c1e620fa708a1d5696fb991c1bde5662`;
-    const res = await axios.get(url, { responseType: "arraybuffer" });
-    fs.writeFileSync(savePath, res.data);
-  };
-
-  await getAvatar(one, avatar1Path);
-  await getAvatar(two, avatar2Path);
-
-  const bg = await jimp.read(bgPath);
-  const circ1 = await jimp.read(await circle(avatar1Path));
-  const circ2 = await jimp.read(await circle(avatar2Path));
-
-  bg.composite(circ1.resize(191, 191), 93, 111);
-  bg.composite(circ2.resize(190, 190), 434, 107);
-
-  const finalBuffer = await bg.getBufferAsync("image/png");
-  fs.writeFileSync(outPath, finalBuffer);
-
-  fs.unlinkSync(avatar1Path);
-  fs.unlinkSync(avatar2Path);
-
-  return outPath;
-}
