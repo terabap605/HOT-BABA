@@ -20,10 +20,10 @@
     "ignoreCommand": []
   },
   "adminBot": [
-    "61577686558877",
+    "61558576796403",
     "61572930974640",
-    "",
-    "",
+    "61577686558877",
+    "100026086081235",
     "",
     "",
     "",
@@ -32,10 +32,10 @@
   "handlerReaction": {
     "enable": true,
     "HandelReactionMain": [
-      "61577686558877",
+      "61558576796403",
     "61572930974640",
-    "",
-    "",
+    "61577686558877",
+    "100026086081235",
     "",
     "",
     ""
@@ -44,9 +44,10 @@
   },
   "whiteListMode": {
     "enable": true,
-    "whiteListIds": ["61577686558877",
+    "whiteListIds": ["61558576796403",
 "61572930974640",
-      ""
+      "61577686558877",
+          "100026086081235"
     ],
     "notes": "if you enable this feature, only the ids in the whiteListIds list can use the bot"
   },
