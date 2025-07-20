@@ -89,39 +89,118 @@ handlerCheckData.cantCreateThread=Groups with id '%1' cannot be written to the d
 handlerCheckData.cantCreateUser=Users with id '%1' cannot be written to the database!
 
 # bot/handler/handlerEvents.js
-handlerEvents.userBanned=You have been banned from using the bot\n» Reason: %1\n» Time: %2\n» User ID: %3
-handlerEvents.threadBanned=This group has been banned from using the bot\n» Reason: %1\n» Time: %2\n» Thread ID: %3
-handlerEvents.onlyAdminBox=This group is currently enabled only group administrators can use the bot
-handlerEvents.onlyAdminBot=❌ | Currently only bot's admin can use bot
-# ✅ CUSTOM STYLED ONE HERE:
-handlerEvents.commandNotFound2=
-╔═════ ⚠️ 𝙎𝙔𝙎𝙏𝙀𝙈 𝘼𝙇𝙀𝙍𝙏 ⚠️ ═════╗
-║ ❌ 𝐄𝐫𝐫𝐨𝐫: 𝐂𝐨𝐦𝐦𝐚𝐧𝐝 𝐍𝐨𝐭 𝐑𝐞𝐜𝐨𝐠𝐧𝐢𝐳𝐞𝐝!
-║
-║ 📦 𝗜𝗻𝗽𝘂𝘁 𝗥𝗲𝗰𝗲𝗶𝘃𝗲𝗱 : %1%2
-║ 🧠 𝗦𝘁𝗮𝘁𝘂𝘀         : ✖ Module Missing
-║
-║ 💡 𝗧𝗶𝗽           : Use ➤ %1help to view all commands
-║ 🧾 𝗡𝗼𝘁𝗲         : Commands are case-sensitive.
-╚═══════════════════════════════╝
+handlerEvents.userBanned =
+`╔═❖🚫❖═『 𝗕𝗔𝗡𝗡𝗘𝗗 𝗡𝗢𝗧𝗜𝗖𝗘 』═❖🚫❖═╗
+✦ You have been 𝘽𝘼𝙉𝙉𝙀𝘿 from using the bot!
+╚════════════════════════════╝
+⟿ 📝 Reason: %1
+⟿ ⏰ Time: %2
+⟿ 🆔 User ID: %3`;
 
-handlerEvents.commandSyntaxError=The command you are using is wrong syntax, please type %1help %2 to see the details of how to use this command
-handlerEvents.onlyAdmin=❌ | Only group administrators can use the command "%1"
-handlerEvents.onlyAdminToUseOnReply=❌ | Only group administrators can use the reply function of the command "%1"
-handlerEvents.onlyAdminToUseOnReaction=❌ | Only group administrators can use the reaction function of the command "%1"
-handlerEvents.onlyAdminBot2=❌ | Only bot's admin can use the command "%1"
-handlerEvents.onlyAdminBot2ToUseOnReply=❌ | Only bot's admin can use the reply function of the command "%1"
-handlerEvents.onlyAdminBot2ToUseOnReaction=❌ | Only bot's admin can use the reaction function of the command "%1"
-handlerEvents.waitingForCommand=⏱ You are in the waiting time to use this command, please come back after %1s
-handlerEvents.errorOccurred=❌ [ %1 ]\nAn error occurred at command "%2"\n\n%3
-handlerEvents.errorOccurred2=❌ [ %1 ]\nAn error occurred at command onChat in command "%2"\n\n%3
-handlerEvents.errorOccurred3=❌ [ %1 ]\nAn error occurred when executing onReply at command "%2"\n\n%3
-handlerEvents.errorOccurred4=❌ [ %1 ]\nAn error occurred when executing onReaction at command "%2"\n\n%3
-handlerEvents.errorOccurred5=❌ [ %1 ]\nAn error occurred when executing onEvent at command "%2"\n\n%3
-handlerEvents.errorOccurred6=❌ [ %1 ]\nAn error occurred when executing onEvent at command "%2"\n\n%3
-handlerEvents.errorOccurred7=❌ [ %1 ]\nAn error occurred when executing onAnyEvent at command "%2"\n\n%3
-handlerEvents.cannotFindCommandName=❌ Cannot find command name to execute this reply!
-handlerEvents.cannotFindCommand=❌ Cannot find command "%1" to execute this reply!
+handlerEvents.threadBanned =
+`╭─❖⚠️❖─『 𝗚𝗥𝗢𝗨𝗣 𝗕𝗔𝗡 』─❖⚠️❖─╮
+This group is 𝗥𝗘𝗦𝗧𝗥𝗜𝗖𝗧𝗘𝗗 from using the bot!
+╰──────────────────────────╯
+📝 Reason: %1
+⏱ Time: %2
+🧵 Thread ID: %3`;
+
+handlerEvents.onlyAdminBox =
+`🔒❖━『 𝗟𝗢𝗖𝗞𝗘𝗗 𝗚𝗥𝗢𝗨𝗣 𝗠𝗢𝗗𝗘 』━❖🔒
+🚫 Only group 𝗔𝗗𝗠𝗜𝗡𝗦 can use the bot`;
+
+handlerEvents.onlyAdminBot =
+`❌👑 ❖ 𝗥𝗘𝗦𝗧𝗥𝗜𝗖𝗧𝗘𝗗 𝗕𝗢𝗧 ❖ 👑❌
+Only the 𝗕𝗢𝗧'𝗦 𝗔𝗗𝗠𝗜𝗡 can use this bot`;
+
+handlerEvents.commandNotFound =
+`🔍✨ ❖ 𝗨𝗡𝗞𝗡𝗢𝗪𝗡 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 ❖ ✨🔍
+✘ The command 「 %1 」 doesn't exist.
+💡 Type %2help to view all commands`;
+
+handlerEvents.commandNotFound2 =
+`🧩🚫 ❖ 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗘𝗥𝗥𝗢𝗥 ❖ 🚫🧩
+The command you're using doesn't exist.
+📖 Type %1help to view available commands`;
+
+handlerEvents.commandSyntaxError =
+`⚠️📘 ❖ 𝗪𝗥𝗢𝗡𝗚 𝗦𝗬𝗡𝗧𝗔𝗫 ❖ 📘⚠️
+✘ Incorrect usage of this command.
+🧠 Use %1help %2 to view correct syntax`;
+
+handlerEvents.onlyAdmin =
+`👮‍♂️🔐 ❖ 𝗥𝗘𝗦𝗧𝗥𝗜𝗖𝗧𝗘𝗗 ❖ 🔐👮‍♂️
+Only group 𝗔𝗗𝗠𝗜𝗡𝗦 can use the command 「 %1 」`;
+
+handlerEvents.onlyAdminToUseOnReply =
+`👮‍♂️💬 ❖ 𝗥𝗘𝗣𝗟𝗬 𝗟𝗜𝗠𝗜𝗧 ❖ 💬👮‍♂️
+Only 𝗔𝗗𝗠𝗜𝗡𝗦 can use reply with command 「 %1 」`;
+
+handlerEvents.onlyAdminToUseOnReaction =
+`👮‍♂️😼 ❖ 𝗥𝗘𝗔𝗖𝗧 𝗟𝗜𝗠𝗜𝗧 ❖ 😼👮‍♂️
+Only 𝗔𝗗𝗠𝗜𝗡𝗦 can use reactions with 「 %1 」`;
+
+handlerEvents.onlyAdminBot2 =
+`🛠️👑 ❖ 𝗥𝗘𝗦𝗧𝗥𝗜𝗖𝗧𝗘𝗗 𝗔𝗖𝗖𝗘𝗦𝗦 ❖ 👑🛠️
+Only 𝗕𝗢𝗧 𝗔𝗗𝗠𝗜𝗡𝗦 can use 「 %1 」`;
+
+handlerEvents.onlyAdminBot2ToUseOnReply =
+`🛠️💬 ❖ 𝗕𝗢𝗧 𝗥𝗘𝗣𝗟𝗬 𝗟𝗢𝗖𝗞 ❖ 💬🛠️
+Only 𝗕𝗢𝗧 𝗔𝗗𝗠𝗜𝗡𝗦 can reply with 「 %1 」`;
+
+handlerEvents.onlyAdminBot2ToUseOnReaction =
+`🛠️❤️ ❖ 𝗕𝗢𝗧 𝗥𝗘𝗔𝗖𝗧 𝗟𝗢𝗖𝗞 ❖ ❤️🛠️
+Only 𝗕𝗢𝗧 𝗔𝗗𝗠𝗜𝗡𝗦 can react with 「 %1 」`;
+
+handlerEvents.waitingForCommand =
+`⏳❖ 𝗖𝗢𝗢𝗟𝗗𝗢𝗪𝗡 ❖⏳
+⚠️ Please wait %1s before using this command again`;
+
+handlerEvents.errorOccurred =
+`❌💥 ❖ 𝗘𝗥𝗥𝗢𝗥 ❖ 💥❌
+[ %1 ] Error in command 「 %2 」
+📄 Details: %3`;
+
+handlerEvents.errorOccurred2 =
+`❌🧠 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗖𝗛𝗔𝗧 ❖ 🧠❌
+[ %1 ] Failed while running onChat for 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.errorOccurred3 =
+`❌💬 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗥𝗘𝗣𝗟𝗬 ❖ 💬❌
+[ %1 ] Failed in onReply at 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.errorOccurred4 =
+`❌🎭 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗥𝗘𝗔𝗖𝗧 ❖ 🎭❌
+[ %1 ] Failed in onReaction at 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.errorOccurred5 =
+`❌📡 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗘𝗩𝗘𝗡𝗧 ❖ 📡❌
+[ %1 ] Error while executing onEvent for 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.errorOccurred6 =
+`❌📡 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗘𝗩𝗘𝗡𝗧 ❖ 📡❌
+[ %1 ] Error while executing onEvent for 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.errorOccurred7 =
+`❌🌐 ❖ 𝗘𝗥𝗥𝗢𝗥 𝗢𝗡 𝗔𝗡𝗬𝗘𝗩𝗘𝗡𝗧 ❖ 🌐❌
+[ %1 ] Error in onAnyEvent for 「 %2 」
+📄 Info: %3`;
+
+handlerEvents.cannotFindCommandName =
+`🚫🔎 ❖ 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗠𝗜𝗦𝗦𝗜𝗡𝗚 ❖ 🔎🚫
+Cannot find command name for this reply!`;
+
+handlerEvents.cannotFindCommand =
+`🚫📂 ❖ 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗡𝗢𝗧 𝗙𝗢𝗨𝗡𝗗 ❖ 📂🚫
+Could not find command 「 %1 」 to run reply!`;
+
+module.exports = handlerEvents;
+
 # bot/autoUptime.js
 autoUptime.autoUptimeTurnedOn=AutoUptime mode turned on
 
