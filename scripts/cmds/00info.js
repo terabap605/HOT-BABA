@@ -4,11 +4,11 @@ module.exports = {
   config: {
     name: "info",
     aliases: ["owner", "dev", "creator"],
-    version: "2.2",
+    version: "2.3",
     author: "BaYjid",
     role: 0,
-    shortDescription: { en: "Rahad Bot info with video" },
-    longDescription: { en: "Shows Rahad Bot uptime, ping, group info & sends a video." },
+    shortDescription: { en: "Rahad Bot info with upgraded design" },
+    longDescription: { en: "Shows Rahad Bot uptime, ping, group info & sends a video with unique grid design." },
     category: "Info",
     guide: { en: "{pn}" }
   },
@@ -35,7 +35,7 @@ module.exports = {
     const adminCount = threadInfo.adminIDs.length;
     const messageCount = threadInfo.messageCount || "N/A";
 
-    // GENDER COUNT (bulk)
+    // GENDER COUNT
     let male = 0, female = 0;
     try {
       const allUserInfo = await api.getUserInfo(threadInfo.participantIDs);
@@ -48,31 +48,28 @@ module.exports = {
       console.error("Gender count failed:", err.message);
     }
 
-    // 🌐✨ Final Message
+    // 🌐✨ Final Upgraded Grid Message
     const msg = 
-`🌐✨ 𝙍𝘼𝙃𝘼𝘿 𝘽𝙊𝙏'𝙎 𝙄𝙉𝙁𝙊... ✨🌐
+`⧉⧉⧉⧉⧉ 『 ⚙️ 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 ⚙️ 』 ⧉⧉⧉⧉⧉
 
-┏━━━━━━━ 🧠 𝗕𝗢𝗧 𝗜𝗡𝗙𝗢 ━━━━━━━┓
-┃⏱️ 𝗨𝗣𝗧𝗜𝗠𝗘   : ${uptime}
-┃📶 𝗣𝗜𝗡𝗚     : ${ping}ms
-┃🛠️ 𝗕𝗢𝗧     : 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 🔥
-┃🔧 𝗩𝗘𝗥𝗦𝗜𝗢𝗡 : 4.5.2
-┃👨‍💻 𝗢𝗪𝗡𝗘𝗥   : 𝙍𝙖𝙝𝙖𝙙 (Itadori Yuji)
-┃📍 𝗙𝗥𝗢𝗠     : 🇧🇩 Bangladesh
-┃📞 𝗖𝗢𝗡𝗧𝗔𝗖𝗧 : +8801734822042
-┗━━━━━━━━━━━━━━━━━━━━┛
+╔═══『 SYSTEM STATUS 』═══╗
+⧫ 𝙐𝙋𝙏𝙄𝙈𝙀 : ${uptime}
+⧫ 𝙋𝙄𝙉𝙂   : ${ping}ms
+╚═════════════════════╝
 
-┏━━━━━━━━ 🧑‍🤝‍🧑 𝗚𝗥𝗢𝗨𝗣 𝗜𝗡𝗙𝗢 ━━━━━━━━┓
-┃📛 𝗡𝗔𝗠𝗘     : ${groupName}
-┃🆔 𝗜𝗗        : ${groupID}
-┃👥 𝗠𝗘𝗠𝗕𝗘𝗥𝗦   : ${memberCount}
-┃🚹 𝗠𝗔𝗟𝗘     : ${male}   🚺 𝗙𝗘𝗠𝗔𝗟𝗘 : ${female}
-┃🛡️ 𝗔𝗗𝗠𝗜𝗡𝗦   : ${adminCount}
-┃💬 𝗠𝗘𝗦𝗦𝗔𝗚𝗘𝗦 : ${messageCount}
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+╔═══『 OWNER INFO 』═══╗
+⧫ 👤 𝙉𝘼𝙈𝙀   : Rahad
+⧫ 📞 𝘾𝙊𝙉𝙏𝘼𝘾𝙏 : +9180160 42533
+╚═════════════════════╝
 
-🔮 𝗠𝗢𝗧𝗧𝗢: "𝗖𝗼𝗱𝗲 𝗪𝗶𝘁𝗵 𝗛𝗼𝗻𝗼𝗿, 𝗙𝗶𝗴𝗵𝘁 𝗪𝗶𝘁𝗵 𝗛𝗲𝗮𝗿𝘁"
-🔥 𝗣𝗢𝗪𝗘𝗥𝗘𝗗 𝗕𝗬 : 𝐗𝐀𝐒𝐒 𝐑𝐀𝐇𝐀𝐃 𝐁𝐎𝐓 🔥`;
+╔═══『 GROUP DATA 』═══╗
+⧫ 🏷️ 𝙉𝘼𝙈𝙀    : ${groupName}
+⧫ 🆔 𝙄𝘿       : ${groupID}
+⧫ 👥 𝙈𝙀𝙈𝘽𝙀𝙍𝙎 : ${memberCount} | 👑 ${adminCount}
+⧫ 🚹 𝙈𝘼𝙇𝙀    : ${male} | 🚺 𝙁𝙀𝙈𝘼𝙇𝙀 : ${female}
+╚═════════════════════╝
+
+⧉ 『 MOTTO : 𝘽𝙪𝙞𝙡𝙙. 𝙃𝙖𝙘𝙠. 𝙍𝙚𝙥𝙚𝙖𝙩. 』⧉`;
 
     // 🎥 VIDEO LIST (random)
     const videoIDs = [
