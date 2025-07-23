@@ -1,92 +1,57 @@
+const fs = require("fs-extra");
 const axios = require("axios");
+const path = __dirname + "/cache/rahad_vibe.jpg";
 
 module.exports = {
   config: {
     name: "info",
-    aliases: ["owner", "dev", "creator"],
-    version: "3.0",
-    author: "BaYjid",
+    version: "999.1",
+    author: "💚 𝐑𝐀𝐇𝐀𝐃 𝐓𝐇𝐄 𝐋𝐄𝐆𝐄𝐍𝐃 💚",
+    countDown: 5,
     role: 0,
-    shortDescription: { en: "Show bot stats with design like screenshot" },
-    longDescription: { en: "Bot uptime, ping, group info, owner info in full styled layout." },
-    category: "Info",
-    guide: { en: "{pn}" }
+    shortDescription: "💚 𝗧𝗛𝗘 𝗞𝗜𝗡𝗚 𝗥𝗔𝗛𝗔𝗗 - 𝗕𝗢𝗧 𝗜𝗡𝗙𝗢 💚",
+    longDescription: "Shows bot details in viral attitude style with image",
+    category: "💚 VIBE ZONE"
   },
 
   onStart: async function ({ api, event }) {
-    const startTime = globalThis.__startTime || (globalThis.__startTime = Date.now());
-    const uptimeMs = Date.now() - startTime;
-    const hours = Math.floor(uptimeMs / 3600000);
-    const minutes = Math.floor((uptimeMs % 3600000) / 60000);
-    const seconds = Math.floor((uptimeMs % 60000) / 1000);
-    const uptime = `${hours}h ${minutes}m ${seconds}s`;
-
-    const pingStart = Date.now();
-    await new Promise(res => setTimeout(res, 40));
-    const ping = Date.now() - pingStart;
-
-    const threadInfo = await api.getThreadInfo(event.threadID);
-    const groupName = threadInfo.threadName || "Unnamed Group";
-    const groupID = event.threadID;
-    const memberCount = threadInfo.participantIDs.length;
-    const adminCount = threadInfo.adminIDs.length;
-
-    let male = 0, female = 0;
-    try {
-      const allUserInfo = await api.getUserInfo(threadInfo.participantIDs);
-      for (const id in allUserInfo) {
-        const gender = allUserInfo[id]?.gender?.toLowerCase();
-        if (gender === "male") male++;
-        else if (gender === "female") female++;
-      }
-    } catch (err) {
-      console.error("Gender count failed:", err.message);
+    if (!fs.existsSync(path)) {
+      const img = await axios.get("https://iili.io/FO141Ra.jpg", { responseType: "stream" });
+      img.data.pipe(fs.createWriteStream(path));
+      await new Promise(resolve => img.data.on("end", resolve));
     }
 
     const msg = `
-╭─「 🧠 *RAHAD BOT SYSTEM* 」─╮
+╭━━━━━━━━━━━━━━━╮
+💚 𝙍 𝘼 𝙃 𝘼 𝘿 – 𝙏𝙃𝙀 𝙊𝙉𝙀 & 𝙊𝙉𝙇𝙔 💚
+╰━━━━━━━━━━━━━━━╯
 
-📊 *SYSTEM STATUS:*
-╭───────────────────────╮
-│ ⏰ *UPTIME* : *Bot Online for* ${uptime}
-│ 📶 *PING*    : *${ping}ms* 🚀
-╰───────────────────────╯
+🥷 𝗡𝗔𝗠𝗘      : 💥 𝑹𝑨𝑯𝑨𝑫 
+📍 𝗙𝗔𝗖𝗘𝗕𝗢𝗢𝗞 : fb.com/rahad  
+🆔 𝗙𝗕 𝗨𝗜𝗗   : 100089824095204  
+🏴‍☠️ 𝗧𝗘𝗔𝗠      : 𝐑𝐀𝐇𝐀𝐃 𝐓𝐇𝐄 𝐊𝐈𝐌𝐆 – 𝐀𝐈 𝐀𝐑𝐌𝐘  
+👑 𝗥𝗢𝗟𝗘      : 𝐅𝐀𝐓𝐇𝐄𝐑 𝐎𝐅 𝐁𝐎𝐓𝐒
 
-🧑‍💻 *OWNER INFO:*
-╭───────────────────────╮
-│ 👤 *NAME*    : *FATHER RAHAD* 🐍
-│ ☎️ *CONTACT* : *+91 80160 42533*
-╰───────────────────────╯
+━━━━━━━━━━━━━━━━━━
 
-👥 *GROUP INFO:*
-╭────────────────────────────────╮
-│ 🏷️ *NAME*     : *${groupName}*
-│ 🆔 *ID*       : *${groupID}*
-│ 👫 *MEMBERS*  : *${memberCount}* 👤 | *ADMINS* 👑 : *${adminCount}*
-│ 🚹 *MALE*     : *${male}* | 🚺 *FEMALE* : *${female}*
-╰────────────────────────────────╯
+🤖 𝗕𝗢𝗧       : 🧬 𝑹𝑨𝑯𝑨𝑫 - 𝑨𝑰 𝑽𝟐  
+🧠 𝗩𝗘𝗥𝗦𝗜𝗢𝗡   : 2.0 (𝗨𝗡𝗕𝗘𝗔𝗧𝗔𝗕𝗟𝗘 💣)  
+📡 𝗨𝗣𝗧𝗜𝗠𝗘    : 24/7 ⚡  
+🚀 𝗣𝗜𝗡𝗚      : 🔥 FASTER THAN LIGHT  
+📀 𝗦𝗬𝗦𝗧𝗘𝗠   : GOAT BOT V2 + RAHAD ENGINE
 
-📜 *『 MOTTO : ✨ Build. Hack. Repeat. ✨ 』*`;
+━━━━━━━━━━━━━━━━━━
 
-    const videoIDs = [
-      "10QycYgsTagrN90cWJCIWWVwmps2kk_oF", "10BQjmmp2isPM47CtEZVhYySDQ1lSiCjW",
-      "10aeHJzXq0kJIGdh9E7lfUKYD0oHqz2o3", "10Ke-d2H4yhGpwwAgRt0HmFV8lRB-QJ2J",
-      "10Jb5FGt600rNrJgr-XeTfZsCSjknJep1", "10CDv_le5rdnOYXF3Kp6bnvTSyWvuwHFb",
-      "11SODMThWq7QXQH6UfIexQwXID5rwndrO", "11yApwtKdKmL5T9_VO42HrBqgmEpcieRD",
-      "11sWbYHxAQmVFB9p1-Yj1Kjdn3y4b2q4u", "11sCEjK2gZ6eylftpVqc4V2W9wpYid3ss",
-      "11r9nJpCAx96pP5upIdK3eCybBqo_e3a0", "11qmi8ceB-q-aFZGxhL65FIdV_Kj-gMad",
-      "11hXIudeOKWRO9BTFpta6s5FyFjt9ULye", "11aIU0gfmMuRjoUTkgp20ZOllMNF7ybaA",
-      "11WC7f3brQzVpDQtY9yZa_IK6tKDggTrg"
-    ];
-    const selectedID = videoIDs[Math.floor(Math.random() * videoIDs.length)];
-    const videoURL = `https://drive.google.com/uc?export=download&id=${selectedID}`;
+🧬 𝗣𝗢𝗪𝗘𝗥𝗘𝗗 𝗕𝗬 : 𝐑𝐀𝐇𝐀𝐃 - 𝐁𝐎𝐒𝐒 𝐎𝐅 𝐁𝐎𝗧𝗦
 
-    try {
-      const videoStream = await axios({ method: "GET", url: videoURL, responseType: "stream" });
-      return api.sendMessage({ body: msg, attachment: videoStream.data }, event.threadID);
-    } catch (err) {
-      console.error("❌ Video failed:", err.message);
-      return api.sendMessage(msg + "\n⚠️ Could not load video.", event.threadID);
-    }
+╭──────────────╮  
+💚 𝗠𝗔𝗗𝗘 𝗪𝗜𝗧𝗛 𝗟𝗢𝗩𝗘 𝗕𝗬 𝗥𝗔𝗛𝗔𝗗 💚  
+╰──────────────╯
+    `.trim();
+
+    api.sendMessage({
+      body: msg,
+      attachment: fs.createReadStream(path)
+    }, event.threadID);
   }
 };
