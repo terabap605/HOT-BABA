@@ -9,60 +9,69 @@ module.exports = {
   config: {
     name: "uptime2",
     aliases: ["up2", "stats"],
-    version: "2.0",
+    version: "2.2",
     author: "BaYjid + Rahad Edit",
     role: 0,
     category: "system",
     guide: { en: "Use {p}uptime2" }
   },
 
-  onStart: async function ({ message, event, api }) {
+  onStart: async function ({ message }) {
     try {
-      const uptime = process.uptime();
-      const formattedUptime = formatUptimeFull(uptime);
-
-      const totalMemory = os.totalmem();
-      const freeMemory = os.freemem();
-      const usedMemory = totalMemory - freeMemory;
-
+      const botUptime = formatUptimeFull(process.uptime());
+      const systemUptime = formatUptimeFull(os.uptime());
+      const totalMem = os.totalmem();
+      const freeMem = os.freemem();
+      const usedMem = totalMem - freeMem;
+      const memPercent = ((usedMem / totalMem) * 100).toFixed(1);
+      const cpuUsagePercent = await getCpuUsagePercent();
       const diskUsage = await getDiskUsageSafe();
 
       const systemInfo = {
         os: `${os.type()} ${os.release()}`,
         arch: os.arch(),
-        cpu: `${os.cpus()[0].model} (${os.cpus().length} cores)`,
+        cpuModel: os.cpus()[0].model.trim(),
+        cpuCores: os.cpus().length,
         loadAvg: os.loadavg()[0].toFixed(2),
-        botUptime: formattedUptime,
-        systemUptime: formatUptime(os.uptime()),
-        processMemory: prettyBytes(process.memoryUsage().rss)
+        botUptime,
+        systemUptime,
+        processMem: prettyBytes(process.memoryUsage().rss)
       };
 
-      const response =
-`╔═━[ 🔰 𝗦𝗬𝗦𝗧𝗘𝗠 𝗢𝗩𝗘𝗥𝗩𝗜𝗘𝗪 ]━═╗
+      const response = 
+`╔═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═╗
+        ⚡✨ 𝗦𝘆𝘀𝘁𝗲𝗺 𝗜𝗻𝗳𝗼𝗿𝗺𝗮𝘁𝗶𝗼𝗻 ✨⚡
+╚═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═╝
 
-[ 🖥 𝗦𝗬𝗦𝗧𝗘𝗠 𝗜𝗡𝗙𝗢 ]
-• OS     : ${systemInfo.os}
-• Arch   : ${systemInfo.arch}
-• CPU    : ${systemInfo.cpu}
-• Load   : ${systemInfo.loadAvg}
+💻 ❯ 𝗢𝗦 & 𝗛𝗮𝗿𝗱𝘄𝗮𝗿𝗲
+──────────────────────────────
+⚙️ • OS           : ${systemInfo.os}
+🧩 • Architecture : ${systemInfo.arch}
+🖥️ • Processor    : ${systemInfo.cpuModel} (${systemInfo.cpuCores} cores)
+🔥 • Load Average : ${systemInfo.loadAvg}
+⚡ • CPU Load %   : ${cpuUsagePercent}%
 
-[ 🧠 𝗠𝗘𝗠𝗢𝗥𝗬 ]
-• Usage  : ${prettyBytes(usedMemory)} / ${prettyBytes(totalMemory)}
-• RAM    : ${prettyBytes(usedMemory)}
+🧠 ❯ 𝗠𝗲𝗺𝗼𝗿𝘆 𝗨𝘀𝗮𝗴𝗲
+──────────────────────────────
+💾 • RAM Used     : ${prettyBytes(usedMem)} / ${prettyBytes(totalMem)} (${memPercent}%)
+🤖 • Bot RAM     : ${systemInfo.processMem}
 
-[ 💾 𝗗𝗜𝗦𝗞 ]
-• Used   : ${diskUsage}
+💽 ❯ 𝗗𝗶𝘀𝗸 𝗨𝘀𝗮𝗴𝗲
+──────────────────────────────
+📀 • Storage     : ${diskUsage}
 
-[ ⏱ 𝗨𝗣𝗧𝗜𝗠𝗘 ]
-• Bot    : ${systemInfo.botUptime}
-• Server : ${systemInfo.systemUptime}
+⏳ ❯ 𝗨𝗽𝘁𝗶𝗺𝗲 𝗗𝗲𝘁𝗮𝗶𝗹𝘀
+──────────────────────────────
+🕒 • Bot        : ${botUptime}
+⏰ • Server     : ${systemUptime}
 
-[ ⚙️ 𝗣𝗥𝗢𝗖𝗘𝗦𝗦 ]
-• Memory : ${systemInfo.processMemory}
+⚙️ ❯ 𝗣𝗿𝗼𝗰𝗲𝘀𝘀 𝗜𝗻𝗳𝗼
+──────────────────────────────
+🧮 • Memory     : ${systemInfo.processMem}
 
-╚═━[ 🔥𝗕𝗢𝗧 ✦ 𝗥𝗮𝗛𝗔𝗗 ]━═╝`;
+╚═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═✦✧═╝
+              🔥 R𝗮𝗛𝗔𝗗 𝗕𝗢𝗧 🔥`;
 
-      // Video IDs
       const videoIDs = [
         "1-BPrxFpmwuoG1V3WkivuR4j-EaTqwtHl",
         "10Jb5FGt600rNrJgr-XeTfZsCSjknJep1",
@@ -72,70 +81,78 @@ module.exports = {
         "1113pJ8_n2CZSMpweO7PEfSKkL4FmHB24",
         "11-ztanCQqCupWBS4m3PLVpkGAfikN3I4",
         "11-V-5WIqa6P_vNk1ZZKu0-jNd2ZIaEuF",
-        "10xdRAg83W70PEw1D_fSGXiR-mBGONWQG",
-        "10qzH9ATigVTYBnTDl169Le7qQ6eM8XJX",
-        "10qQr6NLY4iMiI9kd4TPw6EWaSUijy5kA"
+        "10xdRAg83W70PEw1D_fSGXiR-mBGONW",
+        "16h6cEFYYHqjNAuVsyVhJfoCg_1SBOO82",
+        "16ffVjhqgImn8L6Kf-Oq8VNTnrjEf8var",
+        "172nnsOQDAsZqev3bEnqW01o0KKdULIAU",
+        "16ie1OZ0e7QVpR_YOHsWNRfFHpt0dkDNP"
       ];
 
-      const selected = videoIDs[Math.floor(Math.random() * videoIDs.length)];
-      const videoUrl = `https://drive.google.com/uc?export=download&id=${selected}`;
-      const filePath = path.join(__dirname, "cache", `uptime2_${Date.now()}.mp4`);
+      const randomID = videoIDs[Math.floor(Math.random() * videoIDs.length)];
+      const url = `https://drive.google.com/uc?export=download&id=${randomID}`;
+      const filePath = path.join(__dirname, 'uptime.mp4');
 
-      try {
-        const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
-        fs.ensureDirSync(path.dirname(filePath));
-        fs.writeFileSync(filePath, Buffer.from(res.data, "binary"));
+      const res = await axios.get(url, { responseType: 'stream' });
+      const writer = fs.createWriteStream(filePath);
+      res.data.pipe(writer);
 
-        await api.sendMessage({
-          body: response,
-          attachment: fs.createReadStream(filePath)
-        }, event.threadID, () => fs.unlinkSync(filePath));
-      } catch (videoErr) {
-        console.error("Video failed:", videoErr.message);
-        message.reply(`${response}\n⚠️ But video could not be loaded.`);
-      }
+      writer.on("finish", () => {
+        message.reply({ body: response, attachment: fs.createReadStream(filePath) });
+      });
+
+      writer.on("error", err => {
+        console.error("Failed to download video:", err);
+        message.reply(response);
+      });
 
     } catch (err) {
-      console.error("❌ Uptime2 error:", err.message);
-      message.reply("❌ Couldn't fetch system stats or video.");
+      console.error("Error in uptime2:", err);
+      message.reply("❌ Failed to get system info.");
     }
   }
 };
 
-// Utility Functions
-
-async function getDiskUsageSafe() {
-  try {
-    const { stdout } = await exec('df -k /');
-    const [_, total, used] = stdout.split('\n')[1].split(/\s+/).filter(Boolean);
-    const percent = ((parseInt(used) / parseInt(total)) * 100).toFixed(1);
-    return `${prettyBytes(parseInt(used) * 1024)} / ${prettyBytes(parseInt(total) * 1024)} (${percent}%)`;
-  } catch (e) {
-    return "Disk info unavailable";
-  }
-}
-
-function formatUptime(seconds) {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return `${d}d ${h}h ${m}m`;
-}
-
+// Utils
 function formatUptimeFull(seconds) {
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
   return `${d}d ${h}h ${m}m ${s}s`;
 }
 
 function prettyBytes(bytes) {
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let i = 0;
-  while (bytes >= 1024 && i < units.length - 1) {
-    bytes /= 1024;
-    i++;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return '0 B';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+}
+
+async function getCpuUsagePercent() {
+  const start = os.cpus();
+  await new Promise(r => setTimeout(r, 1000));
+  const end = os.cpus();
+  let idle = 0, total = 0;
+
+  for (let i = 0; i < start.length; i++) {
+    const startCpu = start[i].times;
+    const endCpu = end[i].times;
+    const totalStart = Object.values(startCpu).reduce((a, b) => a + b, 0);
+    const totalEnd = Object.values(endCpu).reduce((a, b) => a + b, 0);
+    idle += endCpu.idle - startCpu.idle;
+    total += totalEnd - totalStart;
   }
-  return `${bytes.toFixed(1)} ${units[i]}`;
+
+  return ((1 - idle / total) * 100).toFixed(1);
+}
+
+async function getDiskUsageSafe() {
+  try {
+    const { stdout } = await exec('df -h /');
+    const lines = stdout.trim().split('\n');
+    const diskLine = lines[1].split(/\s+/);
+    return `${diskLine[2]} used / ${diskLine[1]} (${diskLine[4]})`;
+  } catch (err) {
+    return "Unavailable";
+  }
 }
