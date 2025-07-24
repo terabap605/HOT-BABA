@@ -2,7 +2,7 @@ const { getTime, drive } = global.utils;
 
 if (!global.temp.welcomeEvent) global.temp.welcomeEvent = {};
 
-// All your 20 welcome video IDs
+// All your 28 welcome video IDs
 const welcomeVideos = [
   "1-RV0_mJS0vAZpvO6IDK3f5eJuLIE3jhm",
   "112ZN4pmSeC-HQwi-mG1jrI9qSLKufx7-",
@@ -23,7 +23,15 @@ const welcomeVideos = [
   "1-PnaaGCVhmstwbTQWoKhoEWHB3lM-aqn",
   "1-HcZY03oIUd2wQY2SD6MbMVGv1K68aMo",
   "1-GalZuIDxBP0B2LICslKVv02JK2ic091",
-  "1-FCSzBOgKbEWQXRaGvn9nwFu6Jz6qXQp"
+  "1-FCSzBOgKbEWQXRaGvn9nwFu6Jz6qXQp",
+  "173duL96CL-OJKt_ZGxtqbwPh38bZ0fQk",
+  "17SXiqh-_zd3yRUmzp7s10YFhlK3hROOl",
+  "17RN2DM0BE_FzOZSlzQH_1_2SbhhI-hjW",
+  "17NvXt3Ss03yEyloiJ8yCPqvwQH8n2QgC",
+  "17MiM6FTnnDuNAGJFRQOobEkZvQ_p7VRI",
+  "17KsY5QqVlJFtOqV6Nr-BbkA18QUEHqgD",
+  "17JmAJ9qe6yIMDVFII_wc2soOaSmrQwFG",
+  "177hZ758fhPfSmTMTXs4MFX2tMsyk_q__"
 ];
 
 module.exports = {
@@ -40,8 +48,23 @@ module.exports = {
       session2: "⛅ Noon",
       session3: "🌆 Afternoon",
       session4: "🌙 Evening",
-      welcomeMessage:
-        "🎉 『 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 』 🎉\n\n💠 Hey {userName}!\n🔹 You just joined 『 {boxName} 』\n⏳ Time for some fun! Have a fantastic {session} 🎊\n\n⚠ Please follow all group rules! 🚀\n\n👤 Added by: {adderName}"
+      welcomeMessage: `
+╭─────────────⟡🌟⟡─────────────╮
+      🎉 𝖂𝖊𝖑𝖈𝖔𝖒𝖊 𝖙𝖔 𝕿𝖍𝖊 𝕱𝖆𝖒𝖎𝖑𝖞 🎉
+╰─────────────⟡🌟⟡─────────────╯
+
+👋 𝗛𝗲𝗹𝗹𝗼 {userName}!
+✨ 𝗬𝗼𝘂'𝘃𝗲 𝗷𝘂𝘀𝘁 𝗷𝗼𝗶𝗻𝗲𝗱: 『 {boxName} 』
+
+🕓 𝗧𝗶𝗺𝗲: A beautiful {session} ⏳  
+🎊 𝗩𝗶𝗯𝗲𝘀: Friendly • Fun • Fantastic
+
+📌 𝗣𝗹𝗲𝗮𝘀𝗲 𝗿𝗲𝗮𝗱 𝘁𝗵𝗲 𝗿𝘂𝗹𝗲𝘀 𝗮𝗻𝗱 𝘀𝘁𝗮𝘆 𝗿𝗲𝘀𝗽𝗲𝗰𝘁𝗳𝘂𝗹 🙏  
+➕ 𝗔𝗱𝗱𝗲𝗱 𝗯𝘆: {adderName} 💌
+
+▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔
+🌐 𝗟𝗲𝘁’𝘀 𝗯𝘂𝗶𝗹𝗱 𝗺𝗲𝗺𝗼𝗿𝗶𝗲𝘀 𝘁𝗼𝗴𝗲𝘁𝗵𝗲𝗿 💫
+      `
     }
   },
 
