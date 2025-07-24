@@ -92,8 +92,8 @@ module.exports = {
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━━━━╯`,
 
-      myPrefix:
-'╔══════════════════════════════╗
+      myPrefix: `
+╔══════════════════════════════╗
  ║          ✨ 𝓟𝓻𝓮𝓯𝓲𝔁 𝓢𝓽𝓪𝓽𝓾𝓼 ✨          ║
  ╠══════════════════════════════╣
  ║ 🌍 𝗚𝗹𝗼𝗯𝗮𝗹:  »  %1
@@ -157,7 +157,6 @@ module.exports = {
 
     const randomID = VIDEO_IDS[Math.floor(Math.random() * VIDEO_IDS.length)];
     const videoURL = `https://drive.google.com/uc?export=download&id=${randomID}`;
-
     const videoPath = path.join(__dirname, `temp_${Date.now()}.mp4`);
 
     try {
