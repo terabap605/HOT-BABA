@@ -31,37 +31,77 @@ module.exports = {
     category: "⚙️ Configuration",
     guide: {
       en:
-        "━━━━━━━━━━━━━━━━━━━\n"
-        + "📌 {pn} <new prefix>: Change your group prefix\n"
-        + "📌 {pn} <new prefix> -g: Change global prefix (admin only)\n"
-        + "🛠️ {pn} reset: Reset to default prefix\n"
-        + "💬 Type \"prefix\" to view current prefix + video\n"
-        + "━━━━━━━━━━━━━━━━━━━"
+`╔════════════════════════════════════╗
+ ║       ⚙️ 𝗣𝗥𝗘𝗙𝗜𝗫 𝗖𝗢𝗠𝗠𝗔𝗡𝗗 𝗚𝗨𝗜𝗗𝗘 ⚙️       ║
+ ╠════════════════════════════════════╣
+ ║ 📌 𝗖𝗵𝗮𝗻𝗴𝗲 𝗴𝗿𝗼𝘂𝗽 𝗽𝗿𝗲𝗳𝗶𝘅:                    ║
+ ║    💬 {pn} <new prefix>                  ║
+ ║ 📌 𝗖𝗵𝗮𝗻𝗴𝗲 𝗴𝗹𝗼𝗯𝗮𝗹 𝗽𝗿𝗲𝗳𝗶𝘅 (admin only):       ║
+ ║    💬 {pn} <new prefix> -g               ║
+ ║ 📌 𝗥𝗲𝘀𝗲𝘁 𝘁𝗼 𝗱𝗲𝗳𝗮𝘂𝗹𝘁:                       ║
+ ║    💬 {pn} reset                         ║
+ ║ 📌 𝗦𝗵𝗼𝘄 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝗽𝗿𝗲𝗳𝗶𝘅 + 𝘃𝗶𝗱𝗲𝗼:             ║
+ ║    💬 prefix                             ║
+ ╚════════════════════════════════════╝`
     }
   },
 
   langs: {
     en: {
       reset:
-        "━━━━━━━━━━━━━━━━━━━\n✅ Prefix reset to default: %1\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓟𝓻𝓮𝓯𝓲𝔁 𝓡𝓮𝓼𝓮𝓽 ༻━━━╮
+┃
+┃  ✅ 𝗥𝗲𝘀𝗲𝘁 𝗰𝗼𝗺𝗽𝗹𝗲𝘁𝗲𝗱! 𝗡𝗲𝘄 𝗣𝗿𝗲𝗳𝗶𝘅:  ✨  %1  ✨
+┃
+╰━━━━━━━━━━━━━━━━━━━━━╯`,
+
       onlyAdmin:
-        "━━━━━━━━━━━━━━━━━━━\n⚠️ Only bot admins can change global prefix!\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓐𝓬𝓬𝓮𝓼𝓼 𝓓𝓮𝓷𝓲𝓮𝓭 ༻━━━╮
+┃
+┃  ⛔ 𝗢𝗻𝗹𝘆 𝗔𝗱𝗺𝗶𝗻𝘀 𝗰𝗮𝗻 𝗰𝗵𝗮𝗻𝗴𝗲 𝗴𝗹𝗼𝗯𝗮𝗹 𝗽𝗿𝗲𝗳𝗶𝘅!
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━╯`,
+
       confirmGlobal:
-        "━━━━━━━━━━━━━━━━━━━\n🔄 React to confirm GLOBAL prefix change.\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓒𝓸𝓷𝓯𝓲𝓻𝓶 𝓖𝓵𝓸𝓫𝓪𝓵 ༻━━━╮
+┃
+┃  🔄 𝗥𝗲𝗮𝗰𝘁 𝘁𝗼 𝗰𝗼𝗻𝗳𝗶𝗿𝗺 𝗚𝗟𝗢𝗕𝗔𝗟 𝗽𝗿𝗲𝗳𝗶𝘅 𝗰𝗵𝗮𝗻𝗴𝗲.
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`,
+
       confirmThisThread:
-        "━━━━━━━━━━━━━━━━━━━\n🔄 React to confirm GROUP prefix change.\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓒𝓸𝓷𝓯𝓲𝓻𝓶 𝗚𝗿𝗼𝘂𝗽 ༻━━━╮
+┃
+┃  🔄 𝗥𝗲𝗮𝗰𝘁 𝘁𝗼 𝗰𝗼𝗻𝗳𝗶𝗿𝗺 𝗚𝗥𝗢𝗨𝗣 𝗽𝗿𝗲𝗳𝗶𝘅 𝗰𝗵𝗮𝗻𝗴𝗲.
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`,
+
       successGlobal:
-        "━━━━━━━━━━━━━━━━━━━\n✅ Global prefix changed to: %1\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓢𝓾𝓬𝓬𝓮𝓼𝓼 𝓖𝓵𝓸𝓫𝓪𝓵 ༻━━━╮
+┃
+┃  🎉 𝗚𝗹𝗼𝗯𝗮𝗹 𝗽𝗿𝗲𝗳𝗶𝘅 𝘀𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝗰𝗵𝗮𝗻𝗴𝗲𝗱 𝘁𝗼:
+┃  💠  %1
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━╯`,
+
       successThisThread:
-        "━━━━━━━━━━━━━━━━━━━\n✅ Group prefix changed to: %1\n━━━━━━━━━━━━━━━━━━━",
+`╭━━━༺ 𝓢𝓾𝓬𝓬𝓮𝓼𝓼 𝗚𝗿𝗼𝘂𝗽 ༻━━━╮
+┃
+┃  🎉 𝗚𝗿𝗼𝘂𝗽 𝗽𝗿𝗲𝗳𝗶𝘅 𝘀𝘂𝗰𝗰𝗲𝘀𝘀𝗳𝘂𝗹𝗹𝘆 𝗰𝗵𝗮𝗻𝗴𝗲𝗱 𝘁𝗼:
+┃  💠  %1
+┃
+╰━━━━━━━━━━━━━━━━━━━━━━━╯`,
+
       myPrefix:
-        "━━━━━━━━━━━━━━━━━━━\n"
-        + "🌍 Global Prefix: %1\n"
-        + "💬 Group Prefix: %2\n"
-        + "⏰ Server Time: %3\n"
-        + "━━━━━━━━━━━━━━━━━━━\n"
-        + "💡 Type ➜ %2help to view commands!\n"
-        + "━━━━━━━━━━━━━━━━━━━"
+'╔══════════════════════════════╗
+ ║          ✨ 𝓟𝓻𝓮𝓯𝓲𝔁 𝓢𝓽𝓪𝓽𝓾𝓼 ✨          ║
+ ╠══════════════════════════════╣
+ ║ 🌍 𝗚𝗹𝗼𝗯𝗮𝗹:  »  %1
+ ║ 💬 𝗚𝗿𝗼𝘂𝗽:   »  %2
+ ║ ⏰ 𝗦𝗲𝗿𝘃𝗲𝗿 𝘁𝗶𝗺𝗲: »  %3
+ ╠═══════════════════════════════╣
+ ║ 💡 𝗧𝘆𝗽𝗲 𝘁𝗵𝗶𝘀:  %2help 𝗳𝗼𝗿 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀!
+ ╚═══════════════════════════════╝`
     }
   },
 
@@ -74,52 +114,50 @@ module.exports = {
     }
 
     const newPrefix = args[0];
-    const formSet = {
-      commandName,
-      author: event.senderID,
-      newPrefix,
-      setGlobal: args[1] === "-g"
-    };
+    const setGlobal = args[1] === "-g";
 
-    if (formSet.setGlobal && role < 2) {
+    if (setGlobal && role < 2) {
       return message.reply(getLang("onlyAdmin"));
     }
 
-    const confirmMessage = formSet.setGlobal ? getLang("confirmGlobal") : getLang("confirmThisThread");
+    const confirmMessage = setGlobal ? getLang("confirmGlobal") : getLang("confirmThisThread");
+
     return message.reply(confirmMessage, (err, info) => {
       if (info?.messageID) {
-        formSet.messageID = info.messageID;
-        global.GoatBot.onReaction.set(info.messageID, formSet);
+        global.GoatBot.onReaction.set(info.messageID, {
+          author: event.senderID,
+          newPrefix,
+          setGlobal,
+          messageID: info.messageID
+        });
       }
     });
   },
 
   onReaction: async function ({ message, threadsData, event, Reaction, getLang }) {
-    const { author, newPrefix, setGlobal } = Reaction;
-    if (event.userID !== author) return;
+    if (event.userID !== Reaction.author) return;
 
-    if (setGlobal) {
-      global.GoatBot.config.prefix = newPrefix;
+    if (Reaction.setGlobal) {
+      global.GoatBot.config.prefix = Reaction.newPrefix;
       fs.writeFileSync(global.client.dirConfig, JSON.stringify(global.GoatBot.config, null, 2));
-      return message.reply(getLang("successGlobal", newPrefix));
+      return message.reply(getLang("successGlobal", Reaction.newPrefix));
     }
 
-    await threadsData.set(event.threadID, newPrefix, "data.prefix");
-    return message.reply(getLang("successThisThread", newPrefix));
+    await threadsData.set(event.threadID, Reaction.newPrefix, "data.prefix");
+    return message.reply(getLang("successThisThread", Reaction.newPrefix));
   },
 
   onChat: async function ({ event, message, getLang, threadsData }) {
     if (event.body?.toLowerCase()?.trim() !== "prefix") return;
 
-    const threadData = await threadsData.get(event.threadID);
     const prefix = utils.getPrefix(event.threadID);
     const time = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
 
     const info = getLang("myPrefix", global.GoatBot.config.prefix, prefix, time);
 
-    // Random video
     const randomID = VIDEO_IDS[Math.floor(Math.random() * VIDEO_IDS.length)];
     const videoURL = `https://drive.google.com/uc?export=download&id=${randomID}`;
+
     const videoPath = path.join(__dirname, `temp_${Date.now()}.mp4`);
 
     try {
@@ -129,7 +167,7 @@ module.exports = {
 
       writer.on("finish", () => {
         message.reply({ body: info, attachment: fs.createReadStream(videoPath) }, () => {
-          fs.unlink(videoPath, () => {}); // Clean temp file
+          fs.unlink(videoPath, () => {}); // cleanup
         });
       });
 
