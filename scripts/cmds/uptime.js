@@ -1,107 +1,113 @@
-const fs = require("fs-extra");
+const moment = require("moment-timezone");
 const axios = require("axios");
-const path = require("path");
-const os = require("os");
-const { GoatWrapper } = require("fca-liane-utils");
-const { config } = global.GoatBot;
+const fs = require("fs-extra");
+const configPath = __dirname + "/uptime_config.json";
+
+const boldText = (text) => {
+  const boldMap = {
+    'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚',
+    'H': '𝗛', 'I': '𝗜', 'J': '𝗝', 'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡',
+    'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥', 'S': '𝗦', 'T': '𝗧', 'U': '𝗨',
+    'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
+    'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴',
+    'h': '𝗵', 'i': '𝗶', 'j': '𝗷', 'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻',
+    'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿', 's': '𝘀', 't': '𝘁', 'u': '𝘂',
+    'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',
+    '0': '𝟬', '1': '𝟭', '2': '𝟮', '3': '𝟯', '4': '𝟰',
+    '5': '𝟱', '6': '𝟲', '7': '𝟳', '8': '𝟴', '9': '𝟵'
+  };
+  return text.split('').map(c => boldMap[c] || c).join('');
+};
 
 module.exports = {
   config: {
     name: "uptime",
-    aliases: ["up", "upt", "s"],
-    version: "2.3",
-    author: "Rahad",
+    aliases: ["upt"],
+    version: "1.3",
+    usePrefix: false,
+    author: "𝐌𝐨𝐬𝐭𝐚𝐤𝐢𝐦",
     role: 0,
-    shortDescription: { en: "Bot status + 1 random video" },
-    longDescription: { en: "Show full bot uptime info with 1 random Drive video" },
-    category: "UPTIME",
-    guide: { en: "{pn}" }
+    shortDescription: {
+      en: "View bot uptime and usage stats."
+    },
+    longDescription: {
+      en: "Get the bot's current uptime, total users, active threads, and timezone info."
+    },
+    category: "system",
+    guide: {
+      en: "uptime --image on\nuptime --image off"
+    }
   },
 
-  onStart: async function ({ api, event, usersData, threadsData }) {
+  onStart: async function ({ api, event, args, usersData, threadsData }) {
     try {
+      let config = {};
+      if (fs.existsSync(configPath)) {
+        config = JSON.parse(fs.readFileSync(configPath));
+      }
+
+      const argStr = args.join(" ").toLowerCase();
+      if (argStr.includes("--image on")) {
+        config.image = true;
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        return api.sendMessage("✅ Image mode is now ON.", event.threadID);
+      } else if (argStr.includes("--image off")) {
+        config.image = false;
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        return api.sendMessage("✅ Image mode is now OFF.", event.threadID);
+      }
+
       const allUsers = await usersData.getAll();
       const allThreads = await threadsData.getAll();
       const uptime = process.uptime();
 
-      const d = Math.floor(uptime / 86400);
-      const h = Math.floor((uptime % 86400) / 3600);
-      const m = Math.floor((uptime % 3600) / 60);
-      const s = Math.floor(uptime % 60);
-      const hhmmss = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      const hours = Math.floor(uptime / 3600);
+      const minutes = Math.floor((uptime % 3600) / 60);
+      const seconds = Math.floor(uptime % 60);
 
-      const memUsed = process.memoryUsage().rss;
-      const memTotal = os.totalmem();
-      const memPercent = ((memUsed/memTotal)*100).toFixed(1);
-      const cpu = (process.cpuUsage().user / 1000).toFixed(1);
-      const ping = Math.floor(Math.random()*20)+20;
+      const uptimeFormatted = `${hours}h ${minutes}m ${seconds}s`;
+      const totalUsers = allUsers.length.toLocaleString();
+      const totalThreads = allThreads.length.toLocaleString();
 
-      const osType = os.type();
-      const osArch = os.arch();
-      const osPlat = os.platform();
-      const host = os.hostname();
-      const cpuInfo = os.cpus()[0].model.split(" @")[0];
-      const nodeVer = process.version;
-      const cores = os.cpus().length;
-      const sysUptime = Math.floor(os.uptime() / 60);
-      const active = allThreads.filter(t => t.active).length;
-      const ratio = (allUsers.length / allThreads.length).toFixed(2);
-      const noPrefix = !!config.commandOptions?.applyNoPrefix;
+      const timeZone = "Asia/Dhaka";
+      const currentTime = moment().tz(timeZone).format("YYYY-MM-DD HH:mm:ss");
+      const startTime = moment().subtract(uptime, "seconds").tz(timeZone).format("YYYY-MM-DD HH:mm:ss");
 
-      const msg =
-`╭─[ ⚡ BOT STATUS ]─╮
-│ ✅ Online │ PID: ${process.pid}
-│ ⏱️ Uptime: ${d}d ${h}h ${m}m ${s}s (⏰ ${hhmmss})
-│ 👤 Users : ${allUsers.length}
-│ 💬 Threads : ${allThreads.length} (Active: ${active})
-│ ⚖️ Ratio : ${ratio}
-│ 📡 Ping : ${ping} ms
-│ 🧠 RAM : ${(memUsed/1024/1024).toFixed(1)} MB (${memPercent}%)
-│ ⚙️ CPU : ${cpu} ms
-│ 🧬 Node : ${nodeVer}
-│ 🖥️ OS : ${osType} (${osPlat}) / ${osArch}
-│ 🧠 CPU Info : ${cpuInfo}
-│ ⌚ OS Uptime: ${sysUptime} min
-╰─[ —(••÷ 𝘽𝙮 𝙍𝘼𝙃𝘼𝘿  ÷••)— ]─╯`;
+      const message =
+`╭─⏱️ ${boldText("BOT STATUS & UPTIME")} ─╮
+│
+│ 📌 ${boldText("Uptime")}     : ${uptimeFormatted}
+│ 🕒 ${boldText("Timezone")}   : ${timeZone}
+│ ⏰ ${boldText("Current")}    : ${currentTime}
+│ 🚀 ${boldText("Started")}    : ${startTime}
+│
+├─📊 ${boldText("USAGE STATS")} ──────
+│ 👤 ${boldText("Users")}      : ${totalUsers}
+│ 💬 ${boldText("Threads")}    : ${totalThreads}
+╰─────────────────────╯`;
 
-      const videoIDs = [
-        "1-BPrxFpmwuoG1V3WkivuR4j-EaTqwtHl",
-        "10Jb5FGt600rNrJgr-XeTfZsCSjknJep1",
-        "10CDv_le5rdnOYXF3Kp6bnvTSyWvuwHFb",
-        "10n-t589ieM6QwB8DwsAfBCAz8QQpOSBf",
-        "1199EHI9JgABBCGfGw709sOvIol4J9AQE",
-        "1113pJ8_n2CZSMpweO7PEfSKkL4FmHB24",
-        "11-ztanCQqCupWBS4m3PLVpkGAfikN3I4",
-        "11-V-5WIqa6P_vNk1ZZKu0-jNd2ZIaEuF",
-        "10xdRAg83W70PEw1D_fSGXiR-mBGONWQG",
-        "10qzH9ATigVTYBnTDl169Le7qQ6eM8XJX",
-        "10qQr6NLY4iMiI9kd4TPw6EWaSUijy5kA"
-      ];
+      if (config.image) {
+        try {
+          const imageUrl = "http://160.191.129.54:5000/cdn/zYMnhVKfG.jpg";
+          const imgPath = __dirname + "/uptime.jpg";
+          const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
+          fs.writeFileSync(imgPath, Buffer.from(response.data));
 
-      const selectedID = videoIDs[Math.floor(Math.random() * videoIDs.length)];
-      const videoUrl = `https://drive.google.com/uc?export=download&id=${selectedID}`;
-      const videoPath = path.join(__dirname, "cache", `uptime_${Date.now()}.mp4`);
-
-      try {
-        const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
-        fs.ensureDirSync(path.dirname(videoPath));
-        fs.writeFileSync(videoPath, Buffer.from(res.data, "binary"));
-
-        await api.sendMessage({
-          body: msg,
-          attachment: fs.createReadStream(videoPath)
-        }, event.threadID, () => fs.unlinkSync(videoPath));
-      } catch (videoErr) {
-        console.error("🚫 Video download failed:", videoErr.message);
-        await api.sendMessage(`${msg}\n⚠️ But video failed to load.`, event.threadID);
+          return api.sendMessage({
+            body: message,
+            attachment: fs.createReadStream(imgPath)
+          }, event.threadID, () => fs.unlinkSync(imgPath));
+        } catch (imgErr) {
+          console.error("Image download error:", imgErr);
+          return api.sendMessage(message + "\n\n⚠️ Image download failed, showing text only.", event.threadID);
+        }
+      } else {
+        return api.sendMessage(message, event.threadID);
       }
 
-    } catch (err) {
-      console.error("❌ Uptime error:", err.message);
-      await api.sendMessage("❌ Error: Couldn't fetch uptime or video.", event.threadID);
+    } catch (error) {
+      console.error("Uptime Error:", error);
+      api.sendMessage("❌ Sorry, I couldn't fetch the uptime info right now.", event.threadID);
     }
   }
 };
-
-const wrapper = new GoatWrapper(module.exports);
-wrapper.applyNoPrefix({ allowPrefix: true });
