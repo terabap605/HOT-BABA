@@ -60,7 +60,7 @@ module.exports = {
     if (event.messageReply?.senderID) {
       const info = await api.getUserInfo(event.messageReply.senderID);
       const name = info[event.messageReply.senderID]?.name || "User";
-      userMention = `👤 Mentioned User: ${name}`;
+      userMention = name;
       mentions.push({ tag: name, id: event.messageReply.senderID });
     }
 
@@ -113,7 +113,27 @@ module.exports = {
         const selectedLink = videoLinks[randomIndex];
         const videoPath = await downloadVideo(selectedLink, randomIndex);
 
-        const stylishText = `『 𝗥𝗔𝗛𝗔𝗗 - Official Notice 』\n━━━━━━━━━━━━━━━━━━\n📅 Date & Time: ${timestamp}\n${userMention}\n\n📢 Notice:\n${noticeText}\n━━━━━━━━━━━━━━━━━━\n✅ Admin Announcement - Please Take Action`;
+        const stylishText = `
+╔═✪═✪═✪═✪═✪═✪═✪═╗
+    ⚡⚡ 𝗥𝗔𝗛𝗔𝗗 𝓞𝓕𝓕𝓘𝓒𝓘𝓐𝓛 ⚡⚡
+        🅽🅾🆃🅸🅲🅴 🅱🅾🆃 ⚡⚡
+╚═✪═✪═✪═✪═✪═✪═✪═╝
+
+🗓️ 𝕯𝖆𝖙𝖊 & 𝕋𝖎𝖒𝖊: ✨ ${timestamp} ✨
+
+${userMention ? `👤 𝓜𝓮𝓷𝓽𝓲𝓸𝓷𝗲𝗱: 💫 ${userMention}\n` : ""}
+
+🗣️ 𝓝𝓸𝓽𝓲𝓬𝓮:
+${noticeText.split('\n').map(line => `     ▶︎ 𝔹𝕠𝕝𝕕: ${line}`).join('\n')}
+
+───────────────────────────────
+
+⚠️ 𝓟𝓵𝓮𝓪𝓼𝓮 𝓣𝓪𝓴𝓮 𝓐𝓬𝓽𝓲𝓸𝓷! ⚠️
+
+═══════════════════════════════
+🎉 𝕿𝖍𝖆𝖓𝖐 𝖄𝖔𝖚 𝖋𝖔𝖗 𝕿𝖗𝖚𝖘𝖙𝖎𝖓𝖌 𝗥𝗔𝗛𝗔𝗗 𝕭𝖔𝖙! 🎉
+═══════════════════════════════
+`;
 
         await api.sendMessage({
           body: stylishText,
