@@ -2,11 +2,24 @@ const axios = require("axios");
 const fs = require("fs-extra");
 const path = require("path");
 
+async function getGroupThreadsWithRetry(api, retries = 3, delayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const allThreads = await api.getThreadList(1000, null, ["INBOX"]);
+      if (allThreads && Array.isArray(allThreads)) return allThreads.filter(t => t.isGroup);
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+  }
+  return [];
+}
+
 module.exports = {
   config: {
     name: "notice",
-    aliases: ["notif", "nt"],
-    version: "2.1",
+    aliases: ["notif"],
+    version: "2.3",
     author: "RaHaD",
     countDown: 5,
     role: 2,
@@ -44,7 +57,7 @@ module.exports = {
     }
   },
 
-  onStart: async function ({ message, api, event, args, commandName, envCommands }) {
+  onStart: async function({ message, api, event, args, commandName, envCommands }) {
     const { delayPerGroup, videoLinks } = envCommands[commandName];
 
     if (!Array.isArray(videoLinks) || videoLinks.length === 0)
@@ -67,18 +80,12 @@ module.exports = {
       }
     }
 
-    let allThreads;
+    let groupThreads = [];
     try {
-      allThreads = await api.getThreadList(1000, null, ["INBOX"]);
-    } catch (e) {
-      return message.reply("❌ Failed to get group list from API.");
+      groupThreads = await getGroupThreadsWithRetry(api);
+    } catch (error) {
+      return message.reply("❌ Failed to get group list after multiple retries. Please check your bot session or permissions.");
     }
-
-    if (!allThreads || !Array.isArray(allThreads)) {
-      return message.reply("❌ Failed to get group list from API.");
-    }
-
-    const groupThreads = allThreads.filter(t => t.isGroup && t.threadID !== event.threadID);
 
     if (groupThreads.length === 0) return message.reply("❌ No groups found.");
 
