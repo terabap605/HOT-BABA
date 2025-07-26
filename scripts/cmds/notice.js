@@ -5,7 +5,7 @@ const path = require("path");
 module.exports = {
   config: {
     name: "notice",
-    aliases: ["notif"],
+    aliases: ["notif", "nt"],
     version: "2.1",
     author: "RaHaD",
     countDown: 5,
@@ -58,14 +58,28 @@ module.exports = {
 
     let mentions = [], userMention = "";
     if (event.messageReply?.senderID) {
-      const info = await api.getUserInfo(event.messageReply.senderID);
-      const name = info[event.messageReply.senderID]?.name || "User";
-      userMention = name;
-      mentions.push({ tag: name, id: event.messageReply.senderID });
+      try {
+        const info = await api.getUserInfo(event.messageReply.senderID);
+        userMention = info[event.messageReply.senderID]?.name || "User";
+        mentions.push({ tag: userMention, id: event.messageReply.senderID });
+      } catch {
+        userMention = "User";
+      }
     }
 
-    const allThreads = await api.getThreadList(1000, null, ["INBOX"]);
+    let allThreads;
+    try {
+      allThreads = await api.getThreadList(1000, null, ["INBOX"]);
+    } catch (e) {
+      return message.reply("❌ Failed to get group list from API.");
+    }
+
+    if (!allThreads || !Array.isArray(allThreads)) {
+      return message.reply("❌ Failed to get group list from API.");
+    }
+
     const groupThreads = allThreads.filter(t => t.isGroup && t.threadID !== event.threadID);
+
     if (groupThreads.length === 0) return message.reply("❌ No groups found.");
 
     message.reply(`⏳ Sending notice with random videos to ${groupThreads.length} groups...`);
@@ -95,18 +109,18 @@ module.exports = {
     }
 
     let success = 0, failed = [];
-    const groupVideoHistory = {}; // Track which group got which video indexes
+    const groupVideoHistory = {};
 
     for (const { threadID } of groupThreads) {
       try {
         const usedIndexes = groupVideoHistory[threadID] || [];
-        const availableIndexes = videoLinks
+        let availableIndexes = videoLinks
           .map((_, i) => i)
           .filter(i => !usedIndexes.includes(i));
 
         if (availableIndexes.length === 0) {
           groupVideoHistory[threadID] = [];
-          availableIndexes.push(...videoLinks.map((_, i) => i));
+          availableIndexes = videoLinks.map((_, i) => i);
         }
 
         const randomIndex = availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
@@ -114,24 +128,24 @@ module.exports = {
         const videoPath = await downloadVideo(selectedLink, randomIndex);
 
         const stylishText = `
-╔═✪═✪═✪═✪═✪═✪═✪═╗
-    ⚡⚡ 𝗥𝗔𝗛𝗔𝗗 𝓞𝓕𝓕𝓘𝓒𝓘𝓐𝓛 ⚡⚡
-        🅽🅾🆃🅸🅲🅴 🅱🅾🆃 ⚡⚡
-╚═✪═✪═✪═✪═✪═✪═✪═╝
+╔════════════════════════════╗
+        ⚡ 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗢𝗙𝗙𝗜𝗖𝗜𝗔𝗟 ⚡
+           🅽🅾🆃🅸🅲🅴 𝗕𝗢𝗧 🅷🅴🆁🅴
+╚════════════════════════════╝
 
-🗓️ 𝕯𝖆𝖙𝖊 & 𝕋𝖎𝖒𝖊: ✨ ${timestamp} ✨
+🗓️ 𝗗𝗮𝘁𝗲 & 𝗧𝗶𝗺𝗲: ✨ ${timestamp} ✨
 
-${userMention ? `👤 𝓜𝓮𝓷𝓽𝓲𝓸𝓷𝗲𝗱: 💫 ${userMention}\n` : ""}
+${userMention ? `👤 𝗠𝗲𝗻𝘁𝗶𝗼𝗻𝗲𝗱: 💫 ${userMention}\n` : ""}
 
-🗣️ 𝓝𝓸𝓽𝓲𝓬𝓮:
-${noticeText.split('\n').map(line => `     ▶︎ 𝔹𝕠𝕝𝕕: ${line}`).join('\n')}
+🗣️ 𝗡𝗼𝘁𝗶𝗰𝗲:
+${noticeText.split('\n').map(line => `   ▶️ ${line}`).join('\n')}
 
 ───────────────────────────────
 
-⚠️ 𝓟𝓵𝓮𝓪𝓼𝓮 𝓣𝓪𝓴𝓮 𝓐𝓬𝓽𝓲𝓸𝓷! ⚠️
+⚠️ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗧𝗮𝗸𝗲 𝗔𝗰𝘁𝗶𝗼𝗻! ⚠️
 
 ═══════════════════════════════
-🎉 𝕿𝖍𝖆𝖓𝖐 𝖄𝖔𝖚 𝖋𝖔𝖗 𝕿𝖗𝖚𝖘𝖙𝖎𝖓𝖌 𝗥𝗔𝗛𝗔𝗗 𝕭𝖔𝖙! 🎉
+🎉 𝗧𝗵𝗮𝗻𝗸 𝗬𝗼𝘂 𝗳𝗼𝗿 𝘁𝗿𝘂𝘀𝘁𝗶𝗻𝗴 𝗥𝗔𝗛𝗔𝗗 𝗕𝗼𝘁! 🎉
 ═══════════════════════════════
 `;
 
