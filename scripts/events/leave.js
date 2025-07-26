@@ -3,82 +3,75 @@ const { getTime, drive } = global.utils;
 module.exports = {
   config: {
     name: "leave",
-    version: "1.4",
-    author: "NTKhang + Styled by BaYjid",
+    version: "1.5",
+    author: "Rahad",
     category: "events"
   },
 
   langs: {
     en: {
-      session1: "🌅 Morning",
-      session2: "🍱 Noon",
-      session3: "🌇 Afternoon",
-      session4: "🌃 Evening",
-      leaveType1: "🚪 left",
-      leaveType2: "🛑 was kicked from",
       defaultLeaveMessage: `
-╭━━━[ 👋 𝗠𝗘𝗠𝗕𝗘𝗥 𝗟𝗘𝗙𝗧 ]━━━╮
-┃👤 𝗡𝗮𝗺𝗲: {userNameTag}
-┃📤 𝗦𝘁𝗮𝘁𝘂𝘀: {type} the group
-┃🕒 𝗧𝗶𝗺𝗲: {time}h - {session}
-┃💬 𝗚𝗿𝗼𝘂𝗽: {threadName}
-╰━━━━━━━━━━━━━━━━━━━━━━╯`
+╭━━━💀『 ⚠️ 𝐄𝐗𝐈𝐓 𝐀𝐋𝐄𝐑𝐓 ⚠️ 』💀━━━╮
+┃
+┃ 🧛‍♂️ 𝗨𝘀𝗲𝗿: ⟪ {userNameTag} ⟫
+┃ 🚪 𝗟𝗲𝗳𝘁 𝗦𝘁𝗮𝘁𝘂𝘀: ⟪ {type} ⟫
+┃ ⏰ 𝗧𝗶𝗺𝗲: ⟪ {time}:00 • {session} ⟫
+┃ 🏡 𝗚𝗿𝗼𝘂𝗽: ⟪ {threadName} ⟫
+┃
+┣━━━━━━━━━━━━━━━━━━━━━━━┫
+┃ ❌ 𝗘𝗫𝗜𝗧 𝗗𝗘𝗧𝗘𝗖𝗧𝗘𝗗! 𝗨𝗻𝗮𝘂𝘁𝗵𝗼𝗿𝗶𝘇𝗲𝗱 𝗲𝘅𝗶𝘁...
+┃ 🛰️ 𝗦𝘆𝘀𝘁𝗲𝗺 𝗮𝗹𝗲𝗿𝘁 𝘁𝗿𝗶𝗴𝗴𝗲𝗿𝗲𝗱!
+┃
+╰━━━🔒 𝗦𝗘𝗖𝗨𝗥𝗜𝗧𝗬: 𝗔𝗖𝗧𝗜𝗩𝗘 🔒━━━╯`
     }
   },
 
-  onStart: async ({ threadsData, message, event, api, usersData, getLang }) => {
-    if (event.logMessageType != "log:unsubscribe") return;
+  onStart() {},
 
-    const { threadID } = event;
-    const threadData = await threadsData.get(threadID);
-    if (!threadData.settings.sendLeaveMessage) return;
+  async onEvent({ event, api, getLang, usersData, threadsData }) {
+    const { threadID, logMessageData, logMessageType } = event;
 
-    const { leftParticipantFbId } = event.logMessageData;
-    if (leftParticipantFbId == api.getCurrentUserID()) return;
+    if (logMessageType !== "log:unsubscribe") return;
 
-    const hours = parseInt(getTime("HH"));
-    const threadName = threadData.threadName || "this group";
-    const userName = await usersData.getName(leftParticipantFbId);
+    const dataThread = await threadsData.get(threadID);
+    if (dataThread?.settings?.sendLeaveMessage === false) return;
 
-    let { leaveMessage = getLang("defaultLeaveMessage") } = threadData.data;
-
+    const type = logMessageData.leftParticipantFbId === event.author ? "𝗟𝗲𝗳𝘁 𝗼𝗻 𝗼𝘄𝗻" : "𝗞𝗶𝗰𝗸𝗲𝗱";
+    const userName = await usersData.getName(logMessageData.leftParticipantFbId);
+    const userNameTag = `@${userName}`;
+    const time = getTime("HH");
     const session =
-      hours <= 10 ? getLang("session1") :
-      hours <= 12 ? getLang("session2") :
-      hours <= 18 ? getLang("session3") :
-      getLang("session4");
+      time < 10 ? "𝗠𝗼𝗿𝗻𝗶𝗻𝗴 ☀️" :
+      time < 14 ? "𝗡𝗼𝗼𝗻 🌤️" :
+      time < 18 ? "𝗔𝗳𝘁𝗲𝗿𝗻𝗼𝗼𝗻 ☁️" :
+      time < 23 ? "𝗘𝘃𝗲𝗻𝗶𝗻𝗴 🌙" : "𝗡𝗶𝗴𝗵𝘁 🌌";
 
-    // Replace placeholders
-    leaveMessage = leaveMessage
-      .replace(/\{userName\}|\{userNameTag\}/g, userName)
-      .replace(/\{type\}/g, leftParticipantFbId == event.author ? getLang("leaveType1") : getLang("leaveType2"))
-      .replace(/\{threadName\}|\{boxName\}/g, threadName)
-      .replace(/\{time\}/g, hours)
-      .replace(/\{session\}/g, session);
+    const threadName = dataThread.threadName || "This group";
+    const message = (dataThread.data?.leaveMessage || getLang("defaultLeaveMessage"))
+      .replace(/{userName}/g, userName)
+      .replace(/{userNameTag}/g, userNameTag)
+      .replace(/{type}/g, type)
+      .replace(/{time}/g, time)
+      .replace(/{session}/g, session)
+      .replace(/{threadName}/g, threadName);
 
-    const form = {
-      body: leaveMessage
-    };
+    const mentions = [{ tag: userNameTag, id: logMessageData.leftParticipantFbId }];
 
-    // Add mentions if used
-    if (leaveMessage.includes("{userNameTag}")) {
-      form.mentions = [{
-        id: leftParticipantFbId,
-        tag: userName
-      }];
-    }
+    const videoIDs = [
+      "18J3EFEwCye1_204hyeg48_3Gg0j26niC",
+      "18HkjnCElht-QJQTFaWs2MmTwhA1wj9Xy",
+      "18AhLAh9jdC45zTv9r8o9GdMhuuEzH2zD",
+      "180c6lHeD3f0x6fCC9aTeouekachDt8xQ"
+    ];
+    const randomID = videoIDs[Math.floor(Math.random() * videoIDs.length)];
 
-    // Add attachment if configured
-    if (threadData.data.leaveAttachment) {
-      const files = threadData.data.leaveAttachment;
-      const attachments = files.map(file => drive.getFile(file, "stream"));
-      const results = await Promise.allSettled(attachments);
+    const videoStream = await drive.getFileStream(randomID);
+    const filename = `${randomID}.mp4`;
 
-      form.attachment = results
-        .filter(r => r.status === "fulfilled")
-        .map(r => r.value);
-    }
-
-    message.send(form);
+    api.sendMessage({
+      body: message,
+      mentions,
+      attachment: videoStream
+    }, threadID);
   }
 };
