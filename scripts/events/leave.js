@@ -26,7 +26,6 @@ module.exports = {
     }
   },
 
-  // List of Google Drive video IDs for random attachment
   videoIDs: [
     "18J3EFEwCye1_204hyeg48_3Gg0j26niC",
     "18HkjnCElht-QJQTFaWs2MmTwhA1wj9Xy",
@@ -37,6 +36,10 @@ module.exports = {
     "18SGdkknAOIdxDeJkyOg22MwYLUa9HKyB",
     "18Na0G97r8lTh2ShHn4VXi7ufv_1etIzp"
   ],
+
+  async onStart() {
+    // empty - no startup logic needed
+  },
 
   async onEvent({ event, api, usersData, threadsData, getLang }) {
     if (event.logMessageType !== "log:unsubscribe") return;
@@ -58,10 +61,8 @@ module.exports = {
 
     const threadName = threadData.threadName || "this group";
 
-    // Determine if left or kicked
     const leaveType = leftID === event.author ? "🚪 Left voluntarily" : "🔨 Was kicked";
 
-    // Prepare leave message
     let leaveMessage = threadData.data.leaveMessage || getLang("defaultLeaveMessage");
     leaveMessage = leaveMessage
       .replace(/\{userName\}|\{userNameTag\}/g, userName)
@@ -70,13 +71,11 @@ module.exports = {
       .replace(/\{time\}/g, time)
       .replace(/\{session\}/g, session);
 
-    // Mentions array if needed
     const mentions = [{
       id: leftID,
       tag: userName
     }];
 
-    // Pick random video
     const randomVideoID = this.videoIDs[Math.floor(Math.random() * this.videoIDs.length)];
 
     try {
@@ -88,7 +87,6 @@ module.exports = {
       }, threadID);
     } catch (error) {
       console.error("Failed to send leave video:", error.message);
-      // Send without video if error
       await api.sendMessage({
         body: leaveMessage,
         mentions
