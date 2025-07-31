@@ -1,121 +1,95 @@
 const axios = require("axios");
 const fs = require("fs-extra");
-const tinyurl = require("tinyurl");
 
 const baseApiUrl = async () => {
- const base = await axios.get("https://raw.githubusercontent.com/xnil6x404/Api-Zone/refs/heads/main/Api.json");
- return base.data.xnil2;
+  const base = await axios.get(`https://raw.githubusercontent.com/Blankid018/D1PT0/main/baseApiUrl.json`);
+  return base.data.api;
 };
 
 const config = {
- name: "autodl",
- version: "3.0",
- author: "Rahad",
- credits: "Rahad",
- description: "Auto download videos/images from TikTok, YouTube, FB, IG and more.",
- category: "media",
- commandCategory: "media",
- usePrefix: true,
- prefix: true,
- dependencies: {
- "tinyurl": "",
- "fs-extra": ""
- }
+  name: "autodl",
+  version: "2.0",
+  author: "Father Rahad",
+  credits: "Dipto Modified by Rahad",
+  description: "Auto download video from TikTok, Facebook, Instagram, YouTube, and more",
+  category: "media",
+  commandCategory: "media",
+  usePrefix: true,
+  prefix: true,
+  dependencies: {
+    "fs-extra": "",
+  },
 };
 
 const onStart = () => {};
 
 const onChat = async ({ api, event }) => {
- const body = event.body?.trim();
- if (!body) return;
+  let dipto = event.body || "", ex, cp;
+  try {
+    if (
+      dipto.startsWith("https://vt.tiktok.com") ||
+      dipto.startsWith("https://www.tiktok.com/") ||
+      dipto.startsWith("https://www.facebook.com") ||
+      dipto.startsWith("https://www.instagram.com/") ||
+      dipto.startsWith("https://youtu.be/") ||
+      dipto.startsWith("https://youtube.com/") ||
+      dipto.startsWith("https://x.com/") ||
+      dipto.startsWith("https://www.instagram.com/p/") ||
+      dipto.startsWith("https://pin.it/") ||
+      dipto.startsWith("https://twitter.com/") ||
+      dipto.startsWith("https://vm.tiktok.com") ||
+      dipto.startsWith("https://fb.watch")
+    ) {
+      api.setMessageReaction("⌛", event.messageID, {}, true);
+      const w = await api.sendMessage("⏳ 𝗣𝗹𝗲𝗮𝘀𝗲 𝘄𝗮𝗶𝘁 𝗯𝗮𝗯𝘆... 😘", event.threadID);
 
- const supportedSites = [
- "https://vt.tiktok.com", "https://www.tiktok.com/", "https://vm.tiktok.com",
- "https://www.facebook.com", "https://fb.watch",
- "https://www.instagram.com/", "https://www.instagram.com/p/",
- "https://youtu.be/", "https://www.youtube.com/", "https://youtube.com/watch",
- "https://x.com/", "https://twitter.com/", "https://pin.it/"
- ];
+      const response = await axios.get(`${await baseApiUrl()}/alldl?url=${encodeURIComponent(dipto)}`);
+      const d = response.data;
 
- if (!supportedSites.some(site => body.includes(site))) return;
+      if (d.result.includes(".jpg")) {
+        ex = ".jpg"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else if (d.result.includes(".png")) {
+        ex = ".png"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else if (d.result.includes(".jpeg")) {
+        ex = ".jpeg"; cp = "💌 𝗛𝗲𝗿𝗲'𝘀 𝘆𝗼𝘂𝗿 𝗽𝗵𝗼𝘁𝗼 🥵";
+      } else {
+        ex = ".mp4"; cp = "🎬 𝗩𝗶𝗱𝗲𝗼 𝗱𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗱 💞";
+      }
 
- const startTime = Date.now();
- const waitMsg = await api.sendMessage("⏳ Fetching media for you...\nPlease hold on!", event.threadID);
+      const path = __dirname + `/cache/video${ex}`;
+      fs.writeFileSync(path, Buffer.from((await axios.get(d.result, { responseType: "arraybuffer" })).data, "binary"));
 
- try {
- const apiUrl = `${await baseApiUrl()}/alldl?url=${encodeURIComponent(body)}`;
- const { data } = await axios.get(apiUrl);
- const content = data?.content;
+      const tinyUrlResponse = await axios.get(`https://tinyurl.com/api-create.php?url=${d.result}`);
+      const shortLink = tinyUrlResponse.data;
 
- const mediaLink = content?.result || content?.url;
- if (!mediaLink) {
- return api.sendMessage("❌ Unable to retrieve media. Please check the link or try again later.", event.threadID, event.messageID);
- }
+      api.setMessageReaction("✅", event.messageID, {}, true);
+      api.unsendMessage(w.messageID);
 
- let extension = ".mp4";
- let mediaIcon = "🎬";
- let mediaLabel = "Video";
+      await api.sendMessage({
+        body: `
+╭─〔 👑 𝗙𝗔𝗧𝗛𝗘𝗥 𝗥𝗔𝗛𝗔𝗗 𝗗𝗟 𝗦𝗬𝗦𝗧𝗘𝗠 👑 〕─╮
 
- if (mediaLink.includes(".jpg") || mediaLink.includes(".jpeg")) {
- extension = ".jpg";
- mediaIcon = "🖼️";
- mediaLabel = "Photo";
- } else if (mediaLink.includes(".png")) {
- extension = ".png";
- mediaIcon = "🖼️";
- mediaLabel = "Photo";
- }
+${cp}
 
- const fileName = `media-${event.senderID}-${Date.now()}${extension}`;
- const filePath = `${__dirname}/cache/${fileName}`;
- fs.ensureDirSync(`${__dirname}/cache`);
+📎 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 𝗟𝗜𝗡𝗞:
+${shortLink}
 
- const buffer = await axios.get(mediaLink, { responseType: "arraybuffer" }).then(res => res.data);
- fs.writeFileSync(filePath, Buffer.from(buffer, "binary"));
-
- const shortUrl = await tinyurl.shorten(mediaLink);
- const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-
- api.unsendMessage(waitMsg.messageID);
-
- const stylishMessage = `
-╭━━━[ ✅ 𝗠𝗲𝗱𝗶𝗮 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱𝗲𝗱 ]━━━╮
-┃ ${mediaIcon} Type: ${mediaLabel}
-┃ ⚡ Speed: ${duration}s
-┃ 🔗 Link: ${shortUrl}
-╰━━━━━━━━━━━━━━━━━━━━━━╯
-Enjoy your ${mediaLabel.toLowerCase()}! Made with ❤️ by xnil.
-`;
-
- await api.sendMessage(
- {
- body: stylishMessage,
- attachment: fs.createReadStream(filePath)
- },
- event.threadID,
- () => fs.unlinkSync(filePath),
- event.messageID
- );
-
- } catch (err) {
- console.error("[autodl] Error:", err);
- api.setMessageReaction("❌", event.messageID, true);
-
- const errorMsg = `
-❌ Oops! Something went wrong.
-━━━━━━━━━━━━━━━
-• Error: ${err.message}
-• Try again later or check your link.
-━━━━━━━━━━━━━━━`;
-
- api.sendMessage(errorMsg, event.threadID, event.messageID);
- }
+🔰 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 💚
+╰─────────────⭓`,
+        attachment: fs.createReadStream(path)
+      }, event.threadID, () => fs.unlinkSync(path), event.messageID);
+    }
+  } catch (err) {
+    api.setMessageReaction("❌", event.messageID, {}, true);
+    console.log(err);
+    api.sendMessage(`❌ 𝗘𝗿𝗿𝗼𝗿: ${err.message}`, event.threadID, event.messageID);
+  }
 };
 
 module.exports = {
- config,
- onStart,
- onChat,
- run: onStart,
- handleEvent: onChat
+  config,
+  onChat,
+  onStart,
+  run: onStart,
+  handleEvent: onChat,
 };
