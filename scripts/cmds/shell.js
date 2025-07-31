@@ -4,38 +4,43 @@ module.exports = {
   config: {
     name: "shell",
     version: "1.0",
-    author: "BaYjid",
+    author: "Rahad",
     countDown: 5,
     role: 2,
-    shortDescription: "Execute shell commands",
-    longDescription: "",
-    category: "shell",
+    shortDescription: "🔧 Execute shell commands",
+    longDescription: "Only for authorized user",
+    category: "🔐 Developer",
     guide: {
       vi: "{p}{n} <command>",
       en: "{p}{n} <command>"
     }
   },
 
-  onStart: async function ({ args, message }) {
-    const command = args.join(" ");
+  onStart: async function ({ args, message, event }) {
+    const allowedUID = "61558576796403"; // ✅ Your UID here
 
-    if (!command) {
-      return message.reply("Please provide a command to execute.");
+    if (event.senderID !== allowedUID) {
+      return message.reply("🚫 | You are not allowed to use this command.");
     }
 
-    exec(command, (error, stdout, stderr) => {
+    const command = args.join(" ");
+    if (!command) return message.reply("❌ | Please provide a shell command to execute.");
+
+    exec(command, { timeout: 15000 }, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error executing command: ${error}`);
-        return message.reply(`An error occurred while executing the command: ${error.message}`);
+        console.error(`❗ Shell Error: ${error}`);
+        return message.reply(`❌ | Error:\n\`\`\`\n${error.message}\n\`\`\``);
       }
 
       if (stderr) {
-        console.error(`Command execution resulted in an error: ${stderr}`);
-        return message.reply(`Command execution resulted in an error: ${stderr}`);
+        console.warn(`⚠️ Shell Stderr: ${stderr}`);
+        return message.reply(`⚠️ | Stderr:\n\`\`\`\n${stderr}\n\`\`\``);
       }
 
-      console.log(`Command executed successfully:\n${stdout}`);
-      message.reply(`Command executed successfully:\n${stdout}`);
+      const output = stdout || "✅ | Command executed with no output.";
+      const limitedOutput = output.length > 3000 ? output.slice(0, 3000) + "\n\n[...Output truncated]" : output;
+
+      return message.reply(`✅ | Output:\n\`\`\`\n${limitedOutput}\n\`\`\``);
     });
   }
 };
