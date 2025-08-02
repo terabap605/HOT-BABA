@@ -14,39 +14,36 @@ const VIDEO_IDS = [
 
 function roleToText(role) {
   switch (role) {
-    case 0: return "🌍 All Users";
-    case 1: return "👑 Group Admins";
-    case 2: return "🤖 Bot Admins";
-    default: return "❓ Unknown";
+    case 0: return "🧛 Everyone";
+    case 1: return "🦇 Group Admins";
+    case 2: return "👑 Bot Masters";
+    default: return "☠️ Unknown";
   }
 }
 
-function createVipHeader(title) {
-  const length = 33;
-  const padding = Math.floor((length - title.length) / 2);
-  const padStr = " ".repeat(padding);
-  return `╔═༶═══༺ ${title} ༻═══༶═╗\n`;
+function gothicHeader(title) {
+  return `🦇━╦═══『 ${title} 』═══╦━🦇\n`;
 }
 
-function createVipFooter() {
-  return `╚═════════════════════════════╝\n`;
+function gothicFooter() {
+  return `🕷️━╩═══⛧ 𝔈𝔫𝔡 𝔬𝔣 𝔥𝔢𝔩𝔭 ⛧═══╩━🕷️\n`;
 }
 
-function formatCmdLine(cmd) {
-  return `┊ ${cmd}\n`;
+function gothicLine(cmd) {
+  return `┃ 🩸 『 ${cmd} 』\n`;
 }
 
 module.exports = {
   config: Object.freeze({
     name: "help",
-    version: "1.35",
+    version: "2.0",
     author: "Rahad",
     countDown: 5,
     role: 0,
-    shortDescription: { en: "📚 Your command guide + tutorial video" },
-    longDescription: { en: "🚀 View commands and get tutorial video attachment" },
-    category: "ℹ️ Info",
-    guide: { en: "🔹 {pn}help <command>" },
+    shortDescription: { en: "📜 Unleash your command destiny..." },
+    longDescription: { en: "🦇 Summon knowledge of all available spells (commands) and rituals (usages)." },
+    category: "📚 Guidance",
+    guide: { en: "🧛 {pn}help <command>" },
     priority: 1,
   }),
 
@@ -56,52 +53,51 @@ module.exports = {
     let filterCategory = null;
 
     if (args[0] === "-a" && args[1]) filterAuthor = args.slice(1).join(" ").toLowerCase();
+    else if (args[0] === "-a" && !args[1]) return message.reply("🧛 Provide an author after `-a`.");
     else if (args[0] === "-c" && args[1]) filterCategory = args.slice(1).join(" ").toLowerCase();
+    else if (args[0] === "-c" && !args[1]) return message.reply("🦇 Provide a category after `-c`.");
 
     const randId = VIDEO_IDS[Math.floor(Math.random() * VIDEO_IDS.length)];
     const videoUrl = `https://drive.google.com/uc?export=download&id=${randId}`;
-    const videoPath = path.join(__dirname, "cache", `help_video_${randId}.mp4`);
+    const videoPath = path.join(__dirname, "cache", `goth_help_${randId}_${Date.now()}.mp4`);
 
-    // Show details of a specific command
     if (args.length > 0 && !args[0].startsWith("-")) {
       const cmdName = args[0].toLowerCase();
       const command = commands.get(cmdName) || commands.get(aliases.get(cmdName));
-      if (!command) return message.reply(`❌ Command [${cmdName}] not found!`);
+      if (!command) return message.reply(`🕸️ No such command found: ${cmdName}`);
 
       const c = command.config;
-      const roleText = roleToText(c.role);
-      const usage = (c.guide?.en || "No usage info.").replace(/{pn}/g, prefix).replace(/{n}/g, c.name);
+      const usage = (c.guide?.en || `${prefix}${c.name}`).replace(/{pn}/g, prefix).replace(/{n}/g, c.name);
+
+      const detailMsg =
+`${gothicHeader("🔮 COMMAND DETAILS")}
+🧿 NAME        : 『 ${c.name} 』
+📜 DESC        : ${c.longDescription?.en || "No description"}
+🦴 ALIASES     : ${c.aliases?.length ? c.aliases.join(", ") : "None"}
+📦 VERSION     : ${c.version || "1.0"}
+🛡️ ROLE        : ${roleToText(c.role)}
+⏳ COOLDOWN    : ${c.countDown || 1}s
+✍️ AUTHOR      : ${c.author || "Unknown"}
+🧩 USAGE       : ${usage}
+${gothicFooter()}`;
 
       try {
         const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
         await fs.ensureDir(path.dirname(videoPath));
         await fs.writeFile(videoPath, Buffer.from(res.data, "binary"));
 
-        const detailMsg =
-`${createVipHeader("𝕮𝖔𝖒𝖒𝖆𝖓𝖉 𝕯𝖊𝖙𝖆𝖎𝖑")}
-✦ 𝙽𝙰𝙼𝙴 ⚜ : ${c.name}
-✦ 𝙳𝙴𝚂𝙲 ⚜ : ${c.longDescription?.en || "No description"}
-✦ 𝙰𝙻𝙸𝙰𝚂𝙴𝚂 🜚 : ${c.aliases?.length ? c.aliases.join(", ") : "None"}
-✦ 𝚅𝙴𝚁𝚂𝙸𝙾𝙽 🜚 : ${c.version || "1.0"}
-✦ 𝚁𝙾𝙻𝙴 ⚛ : ${roleText}
-✦ 𝙲𝙾𝙾𝙻𝙳𝙾𝚆𝙽 ⚛ : ${c.countDown || 1}s
-✦ 𝙰𝚄𝚃𝙷𝙾𝚁 🜚 : ${c.author || "Unknown"}
-✦ 𝚄𝚂𝙰𝙶𝙴 ⚜ : ${usage}
-${createVipFooter()}`;
-
-        await message.reply({ body: detailMsg, attachment: fs.createReadStream(videoPath) }, async () => {
-          try { await fs.unlink(videoPath); } catch {}
-        });
+        await message.reply({ body: detailMsg, attachment: fs.createReadStream(videoPath) })
+          .finally(() => fs.unlink(videoPath).catch(() => {}));
       } catch (e) {
-        console.error("Video download error:", e.message);
-        return message.reply("⚠️ Could not load help video, please try again later.");
+        console.error("🧛 Video error:", e.message);
+        return message.reply("⚠️ Could not fetch the help scroll... try again soon.");
       }
       return;
     }
 
-    // Show full commands list
+    // Display full command list
     const categories = {};
-    let totalCommands = 0;
+    let total = 0;
 
     for (const [name, command] of commands) {
       const c = command.config;
@@ -109,43 +105,39 @@ ${createVipFooter()}`;
       if (filterAuthor && c.author?.toLowerCase() !== filterAuthor) continue;
       if (filterCategory && c.category?.toLowerCase() !== filterCategory) continue;
 
-      const cat = c.category || "Uncategorized";
+      const cat = c.category || "Unholy";
       if (!categories[cat]) categories[cat] = [];
       categories[cat].push(name);
-      totalCommands++;
+      total++;
     }
 
-    if (totalCommands === 0) {
-      const filterMsg = filterAuthor
-        ? `author "${filterAuthor}"`
-        : `category "${filterCategory}"`;
-      return message.reply(`🚫 No commands found for ${filterMsg}.`);
+    if (total === 0) {
+      const f = filterAuthor ? `author "${filterAuthor}"` : `category "${filterCategory}"`;
+      return message.reply(`🧛 No rituals found for ${f}.`);
     }
 
-    let msg = createVipHeader("𝕽𝖆𝖍𝖆𝖉 𝕯𝖔𝖒𝖎𝖓𝖎𝖔𝖓");
+    let msg = gothicHeader("📖 SPELLBOOK");
 
     Object.keys(categories).sort().forEach(cat => {
-      msg += `✦ 𝙲𝙰𝚃𝙴𝙶𝙾𝚁𝚈 — ${cat} ☄️\n`;
+      msg += `\n🕯️ CATEGORY: ✦ ${cat.toUpperCase()} ✦\n`;
       categories[cat].sort().forEach(cmd => {
-        msg += formatCmdLine(`🜚 『 ${cmd} 』`);
+        msg += gothicLine(cmd);
       });
-      msg += "\n";
     });
 
-    msg += `➸ 𝕋𝕠𝕥𝕒𝕝 𝒞𝑜𝓂𝓂𝒶𝓃𝒹𝓈: ${totalCommands}\n`;
-    msg += `➸ 𝙷𝚒𝚗𝚝: Use 『 ${prefix}help <command> 』 for details\n`;
-    msg += createVipFooter();
+    msg += `\n📊 TOTAL COMMANDS: ${total}\n`;
+    msg += `📎 HINT: Try 『 ${prefix}help <command> 』for deep knowledge\n`;
+    msg += gothicFooter();
 
     try {
       const res = await axios.get(videoUrl, { responseType: "arraybuffer" });
       await fs.ensureDir(path.dirname(videoPath));
       await fs.writeFile(videoPath, Buffer.from(res.data, "binary"));
 
-      await message.reply({ body: msg, attachment: fs.createReadStream(videoPath) }, async () => {
-        try { await fs.unlink(videoPath); } catch {}
-      });
+      await message.reply({ body: msg, attachment: fs.createReadStream(videoPath) })
+        .finally(() => fs.unlink(videoPath).catch(() => {}));
     } catch (e) {
-      console.error("Video download error:", e.message);
+      console.error("🕷️ Gothic video error:", e.message);
       return message.reply(msg);
     }
   }
