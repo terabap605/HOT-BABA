@@ -1,95 +1,103 @@
-module.exports.config = {
-  name: "autotimer",
-  version: "4.0",
-  role: 0,
-  author: "Bayjid x ChatGPT",
-  description: "Send hourly messages with stylish text and different videos (BD Time)",
-  category: "AutoTime",
-  countDown: 5,
+let isTimerRunning = false;
+let intervalID = null;
+
+const timerData = {
+"01:00:00 AM": { message: "🕐 1AM - Night owl detected! 🦉", url: null },
+"02:00:00 AM": { message: "🕑 2AM - Late night coder? 💻", url: null },
+"03:00:00 AM": { message: "🕒 3AM - Sleep is important 😴", url: null },
+"04:00:00 AM": { message: "🕓 4AM - You up? 🌙", url: null },
+"05:00:00 AM": { message: "🕔 5AM - Almost sunrise 🌅", url: null },
+"06:00:00 AM": { message: "🌄 〘 𝙂𝙤𝙤𝙙 𝙈𝙤𝙧𝙣𝙞𝙣𝙜! 〙✨\n𝑹𝒊𝒔𝒆 𝒂𝒏𝒅 𝒔𝒉𝒊𝒏𝒆! 🔔", url: null },
+"07:00:00 AM": { message: "🕖 7AM - Ready to grind? ⚡", url: null },
+"08:00:00 AM": { message: "🕗 8AM - Grab breakfast! 🥞", url: null },
+"09:00:00 AM": { message: "🕘 9AM - Work mode ON 💼", url: null },
+"10:00:00 AM": { message: "🕙 10AM - Focus hour 🧠", url: null },
+"11:00:00 AM": { message: "🕚 11AM - Keep going! 🚀", url: null },
+"12:00:00 PM": { message: "🍱 〘 𝑳𝒖𝒏𝒄𝒉 𝑻𝒊𝒎𝒆! 〙😋\n𝑻𝒊𝒎𝒆 𝒕𝒐 𝒓𝒆𝒇𝒖𝒆𝒍 🔋", url: null },
+"01:00:00 PM": { message: "🕐 1PM - Back to hustle 💪", url: null },
+"02:00:00 PM": { message: "🕑 2PM - Power through 🔥", url: null },
+"03:00:00 PM": { message: "☕ 〘 𝘼𝙛𝙩𝙚𝙧𝙣𝙤𝙤𝙣 𝙍𝙚𝙢𝙞𝙣𝙙𝙚𝙧 〙💦\n𝑯𝒚𝒅𝒓𝒂𝒕𝒆 & 𝒔𝒕𝒂𝒚 𝒇𝒐𝒄𝒖𝒔𝒆𝒅 🧠", url: null },
+"04:00:00 PM": { message: "🕓 4PM - Stretch a bit 🧘", url: null },
+"05:00:00 PM": { message: "🕔 5PM - Wrapping up soon! 🎯", url: null },
+"06:00:00 PM": { message: "🕕 6PM - Evening begins 🌆", url: null },
+"07:00:00 PM": { message: "🌇 〘 𝙀𝙫𝙚𝙣𝙞𝙣𝙜 𝙈𝙤𝙤𝙙 〙🎧\n𝑺𝒆𝒕𝒕𝒍𝒆 𝒅𝒐𝒘𝒏, 𝒆𝒏𝒋𝒐𝒚 𝒕𝒉𝒆 𝒗𝒊𝒃𝒆𝒔 ✨", url: null },
+"08:00:00 PM": { message: "🕗 8PM - Relax mode 💆", url: null },
+"09:00:00 PM": { message: "🌙 〘 𝙉𝙞𝙜𝙝𝙩 𝙁𝙚𝙚𝙡𝙨 〙💤\n𝑺𝒕𝒂𝒓𝒔 𝒂𝒓𝒆 𝒔𝒉𝒊𝒏𝒊𝒏𝒈... ✨", url: null },
+"10:00:00 PM": { message: "🕙 10PM - Unwind & breathe 🌬️", url: null },
+"11:00:00 PM": { message: "🌌 〘 𝙂𝙤𝙤𝙙𝙣𝙞𝙜𝙝𝙩 𝙎𝙞𝙜𝙣 𝙊𝙛𝙛 〙😴\n𝑺𝒘𝒆𝒆𝒕 𝒅𝒓𝒆𝒂𝒎𝒔! 🌠", url: null },
+"12:00:00 AM": { message: "🕛 Midnight - Sleep tight 🌚", url: null }
 };
 
-const videoMap = {
-  0: "13opJkICUIzLTSFCjZg3ksIRqRR6530QH",
-  1: "13y1WQ1SgDexQmCOhUrWd9VWZutKyOmM2",
-  2: "13yp6fQ67gb0GgnJXRGCfbW9C-9pY1cR8",
-  3: "142JD_gs1B-FZf4mk4opw-UylES01-4yc",
-  4: "13oTsTt9vhWp1UGNuZYsDnVlMo85Wx50D"
-  // Add more hours with corresponding video IDs
+module.exports.config = {
+name: "autotimer",
+version: "3.0",
+role: 0,
+author: "Dipto (Styled by ChatGPT)",
+description: "⏰ প্রতি ঘন্টায় ইউনিক অটো মেসেজ পাঠাবে",
+category: "AutoTime",
+countDown: 3
 };
+
+function getCurrentTime() {
+return new Date(Date.now() + 21600000).toLocaleTimeString("en-US", {
+hour: "2-digit",
+minute: "2-digit",
+second: "2-digit",
+hour12: true
+}).trim();
+}
+
+async function startTimer(api) {
+if (isTimerRunning) return;
+isTimerRunning = true;
+
+intervalID = setInterval(async () => {
+const now = getCurrentTime();
+const entry = timerData[now];
+if (!entry) return;
+
+const threads = global.GoatBot.config?.whiteListModeThread?.whiteListThreadIds || [];  
+
+for (const threadID of threads) {  
+  await api.sendMessage(  
+    {  
+      body: `╭───────────────⏰\n│  ${entry.message}\n╰───────────────🕒 ${now}`  
+    },  
+    threadID  
+  );  
+}
+
+}, 1000);
+}
+
+function stopTimer() {
+if (intervalID) clearInterval(intervalID);
+isTimerRunning = false;
+}
 
 module.exports.onLoad = async ({ api }) => {
-  const templates = {
-    all: `
-┏━━━━━━━━━━━━━━━💫━━━━━━━━━━━━━━━┓
-┃ 🕰️ 𝙏𝙞𝙢𝙚: 〔 {TIME} 〕
-┃ 💬 𝙂𝙧𝙤𝙪𝙥: {GROUP}
-┃ ✨ {GREETING}
-┃ 💡 𝙏𝙞𝙥: 𝙎𝙩𝙖𝙮 𝙥𝙤𝙨𝙞𝙩𝙞𝙫𝙚, 𝙨𝙩𝙖𝙮 𝙛𝙤𝙘𝙪𝙨𝙚𝙙!
-┗━━━━━━━━━━━━━━━🌙━━━━━━━━━━━━━━━┛
-🎯 🚀 🔥 𝑪𝒐𝒏𝒒𝒖𝒆𝒓 𝒚𝒐𝒖𝒓 𝒉𝒐𝒖𝒓!
-`,
-  };
-
-  const greetingForHour = (h) => {
-    if (h >= 0 && h < 5)
-      return "🌌 𝑴𝒊𝒅𝒏𝒊𝒈𝒉𝒕 𝑺𝒆𝒓𝒆𝒏𝒊𝒕𝒚 ~ 𝑻𝒊𝒎𝒆 𝒕𝒐 𝒓𝒆𝒔𝒕 💭🛌";
-    if (h >= 5 && h < 8)
-      return "🌄 𝑹𝒊𝒔𝒆 & 𝑺𝒉𝒊𝒏𝒆! 𝑨 𝒏𝒆𝒘 𝒅𝒂𝒚 𝒃𝒆𝒈𝒊𝒏𝒔 ✨☕";
-    if (h >= 8 && h < 12)
-      return "🌞 𝑮𝒐𝒐𝒅 𝑴𝒐𝒓𝒏𝒊𝒏𝒈! 𝑺𝒕𝒂𝒚 𝒑𝒓𝒐𝒅𝒖𝒄𝒕𝒊𝒗𝒆 🚀📚";
-    if (h >= 12 && h < 14)
-      return "🌤️ 𝑰𝒕'𝒔 𝑴𝒊𝒅𝒅𝒂𝒚! 𝑲𝒆𝒆𝒑 𝒈𝒐𝒊𝒏𝒈 💪🍱";
-    if (h >= 14 && h < 17)
-      return "🌼 𝑨𝒇𝒕𝒆𝒓𝒏𝒐𝒐𝒏 𝑭𝒐𝒄𝒖𝒔 𝑴𝒐𝒅𝒆 𝑶𝑵 🎯📈";
-    if (h >= 17 && h < 19)
-      return "🌇 𝑬𝒗𝒆𝒏𝒊𝒏𝒈 𝑮𝒍𝒐𝒘 𝑻𝒊𝒎𝒆! 𝑹𝒆𝒍𝒂𝒙 & 𝑹𝒆𝒔𝒆𝒕 🌿📖";
-    if (h >= 19 && h < 22)
-      return "🌃 𝑷𝒆𝒂𝒄𝒆𝒇𝒖𝒍 𝑵𝒊𝒈𝒉𝒕𝒇𝒂𝒍𝒍 ~ 𝑺𝒕𝒂𝒚 𝒄𝒂𝒍𝒎 😌🌙";
-    return "🌙 𝑳𝒂𝒕𝒆 𝑵𝒊𝒈𝒉𝒕 𝑴𝒐𝒅𝒆. 𝑺𝒘𝒆𝒆𝒕 𝒅𝒓𝒆𝒂𝒎𝒔 🛌⭐";
-  };
-
-  const getVideoStream = async (id) => {
-    const url = `https://drive.google.com/uc?export=download&id=${id}`;
-    try {
-      return await global.utils.getStreamFromURL(url);
-    } catch (e) {
-      console.error("❌ Video fetch failed:", e.message);
-      return null;
-    }
-  };
-
-  const checkAndSend = async () => {
-    const now = new Date(Date.now() + 21600000);
-    const hour = now.getHours();
-    const timeStr = now.toLocaleTimeString('en-GB', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    });
-    const boxedTime = `【 ${timeStr} 】`;
-    const greeting = greetingForHour(hour);
-    const threads = global.GoatBot.config.whiteListModeThread?.whiteListThreadIds || [];
-    const attachment = videoMap[hour] ? await getVideoStream(videoMap[hour]) : null;
-
-    for (const threadID of threads) {
-      try {
-        const info = await api.getThreadInfo(threadID);
-        const groupName = info.threadName || "Group";
-        const msg = templates.all
-          .replace("{TIME}", boxedTime)
-          .replace("{GROUP}", groupName)
-          .replace("{GREETING}", greeting);
-        await api.sendMessage({ body: msg, attachment }, threadID);
-      } catch (err) {
-        console.error(`❌ Failed to send to ${threadID}:`, err.message);
-      }
-    }
-
-    const nextHour = new Date(now);
-    nextHour.setMinutes(0, 0, 0);
-    nextHour.setHours(hour + 1);
-    setTimeout(checkAndSend, nextHour - now);
-  };
-
-  checkAndSend();
+await startTimer(api); // auto start
 };
 
-module.exports.onStart = () => {}; 
+module.exports.onStart = async ({ message, args, api }) => {
+const cmd = args[0];
+
+if (cmd === "on") {
+if (isTimerRunning) return message.reply("⏳ Timer already running.");
+await startTimer(api);
+return message.reply("✅ AutoTimer started.");
+}
+
+if (cmd === "off") {
+if (!isTimerRunning) return message.reply("❌ Timer is not running.");
+stopTimer();
+return message.reply("🛑 AutoTimer stopped.");
+}
+
+if (cmd === "status") {
+return message.reply(📊 AutoTimer status: ${isTimerRunning ? "Running ✅" : "Stopped ❌"});
+}
+
+return message.reply("📘 Usage:\n/autotimer on\n/autotimer off\n/autotimer status");
+};
+
