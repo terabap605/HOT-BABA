@@ -2,7 +2,7 @@ const { getTime, drive } = global.utils;
 
 if (!global.temp.welcomeEvent) global.temp.welcomeEvent = {};
 
-// All 14 welcome video IDs
+// 14 Welcome Video IDs
 const welcomeVideos = [
   "1-RV0_mJS0vAZpvO6IDK3f5eJuLIE3jhm",
   "112ZN4pmSeC-HQwi-mG1jrI9qSLKufx7-",
@@ -23,21 +23,32 @@ const welcomeVideos = [
 module.exports = {
   config: {
     name: "welcome",
-    version: "3.0",
-    author: "BaYjid",
+    version: "3.1",
+    author: "BaYjid + Rahad Fix",
     category: "events"
   },
 
   langs: {
     en: {
-      session1: "☀ 𝓜𝓸𝓻𝓷𝓲𝓷𝓰",
-      session2: "⛅ 𝓝𝓸𝓸𝓷",
-      session3: "🌆 𝓐𝓯𝓽𝓮𝓻𝓷𝓸𝓸𝓷",
-      session4: "🌙 𝓔𝓿𝓮𝓷𝓲𝓷𝓰",
-      welcomeMessage:
-        "🎉 『 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 』 🎉\n\n💠 𝗛𝗲𝘆 {userName}!\n🔹 𝗬𝗼𝘂 𝗷𝘂𝘀𝘁 𝗷𝗼𝗶𝗻𝗲𝗱 『 {boxName} 』\n⏳ 𝗧𝗶𝗺𝗲 𝗳𝗼𝗿 𝘀𝗼𝗺𝗲 𝗳𝘂𝗻! 𝗛𝗮𝘃𝗲 𝗮 𝗳𝗮𝗻𝘁𝗮𝘀𝘁𝗶𝗰 {session} 🎊\n\n⚠ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗳𝗼𝗹𝗹𝗼𝘄 𝗮𝗹𝗹 𝗴𝗿𝗼𝘂𝗽 𝗿𝘂𝗹𝗲𝘀! 🚀\n\n👤 𝗔𝗱𝗱𝗲𝗱 𝗯𝘆: {adderName}",
-      multiple1: "🔹 𝖸𝗈𝗎",
-      multiple2: "🔹 𝖸𝗈𝗎 𝖦𝗎𝗒𝗌"
+      session1: "🌅 𝑴𝒐𝒓𝒏𝒊𝒏𝒈",
+      session2: "🌤️ 𝑵𝒐𝒐𝒏",
+      session3: "🌇 𝑨𝒇𝒕𝒆𝒓𝒏𝒐𝒐𝒏",
+      session4: "🌌 𝑬𝒗𝒆𝒏𝒊𝒏𝒈",
+      welcomeMessage: 
+`╭━━━━━━ ⬣ ⚝ ⬣ ━━━━━━╮
+ 🌸 𝑾𝒆𝒍𝒄𝒐𝒎𝒆, {userName} 🌸
+ ╰━━━━━━ ⬣ ⚝ ⬣ ━━━━━━╯
+
+🚪 𝗝𝗼𝗶𝗻𝗲𝗱 𝗧𝗵𝗲: 『 {boxName} 』
+🧭 𝗧𝗶𝗺𝗲 𝗼𝗳 𝗗𝗮𝘆: {session}
+🎭 𝗔𝗱𝗱𝗲𝗱 𝗕𝘆: {adderName}
+
+📖 𝗥𝘂𝗹𝗲𝘀 𝗠𝗮𝘁𝘁𝗲𝗿 — 𝗥𝗲𝘀𝗽𝗲𝗰𝘁 𝗘𝘃𝗲𝗿𝘆𝗼𝗻𝗲 🛡️
+🧃 𝗨𝘀𝗲 『 {prefix}help 』 𝘁𝗼 𝘀𝗲𝗲 𝗯𝗼𝘁 𝗰𝗼𝗺𝗺𝗮𝗻𝗱𝘀!
+
+✨ 𝗛𝗮𝘃𝗲 𝗔 𝗠𝗮𝗴𝗶𝗰𝗮𝗹 𝗝𝗼𝘂𝗿𝗻𝗲𝘆! 🌠`,
+      multiple1: "🌟 𝖸𝗈𝗎",
+      multiple2: "🌟 𝖸𝗈𝗎 𝖦𝗎𝗒𝗌"
     }
   },
 
@@ -49,11 +60,17 @@ module.exports = {
     const hours = parseInt(getTime("HH"));
     const nickNameBot = global.GoatBot.config.nickNameBot;
 
-    // If bot was added
+    // If bot was added to the group
     if (added.some(u => u.userFbId === api.getCurrentUserID())) {
       if (nickNameBot)
         await api.changeNickname(nickNameBot, threadID, api.getCurrentUserID());
-      return message.send(getLang("welcomeMessage", global.utils.getPrefix(threadID)));
+
+      const prefix = global.utils.getPrefix(threadID);
+      const intro = `🤖 *GoatBot এখন এই গ্রুপে যুক্ত হলো!* \n\n📝 টাইপ করুন '${prefix}help' সব কমান্ড দেখতে।`;
+      await message.send(intro);
+
+      // Also send the welcome message after intro
+      return message.send(getLang("welcomeMessage", prefix));
     }
 
     if (!global.temp.welcomeEvent[threadID])
@@ -72,35 +89,27 @@ module.exports = {
       const newMembers = members.filter(m => !banned.some(b => b.id === m.userFbId));
       if (newMembers.length === 0) return;
 
-      // Mentions for new users
       const mentions = newMembers.map(u => ({ tag: u.fullName, id: u.userFbId }));
-
-      // Names combined
       const names = newMembers.map(u => u.fullName).join(", ");
-
-      // Info of the person who added
       const adderInfo = await api.getUserInfo(event.author);
       const adderName = adderInfo[event.author]?.name || "Someone";
       mentions.push({ tag: adderName, id: event.author });
 
-      // Session based greeting
       let session;
       if (hours <= 10) session = getLang("session1");
       else if (hours <= 12) session = getLang("session2");
       else if (hours <= 18) session = getLang("session3");
       else session = getLang("session4");
 
-      // Dynamic user name text based on number of users
       const userNameText = newMembers.length > 1 ? getLang("multiple2") : getLang("multiple1");
-
-      // Compose message body
+      const prefix = global.utils.getPrefix(threadID);
       const body = getLang("welcomeMessage")
         .replace("{userName}", `${userNameText} (${names})`)
         .replace("{boxName}", threadName)
         .replace("{session}", session)
-        .replace("{adderName}", adderName);
+        .replace("{adderName}", adderName)
+        .replace("{prefix}", prefix);
 
-      // Pick a random video
       const fileId = welcomeVideos[Math.floor(Math.random() * welcomeVideos.length)];
       let attachment = null;
 
@@ -109,7 +118,6 @@ module.exports = {
         if (stream) attachment = [stream];
       } catch (err) {
         console.error("❌ Video Load Error:", err.message);
-        // You can optionally add a fallback image/gif here if desired
       }
 
       await message.send({ body, mentions, attachment });
