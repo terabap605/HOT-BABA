@@ -1,7 +1,6 @@
 const axios = require("axios");
 const path = require("path");
 const fs = require("fs");
-
 const baseApiUrl = async () => {
   const base = await axios.get(
     `https://raw.githubusercontent.com/Mostakim0978/D1PT0/refs/heads/main/baseApiUrl.json`
@@ -12,217 +11,260 @@ const baseApiUrl = async () => {
 module.exports = {
   config: {
     name: "album",
-    version: "1.1.0",
+    version: "1.0.0",
     role: 0,
-    author: "Dipto + Rahad Style",
-    description: "🖼️ Choose and view curated video/photo albums",
-    category: "media",
+    author: "Dipto",
+    description: "Displays album options for selection.",
+    category: "Media",
     countDown: 5,
     guide: {
-      en: "🌀 Usage: {p}{n} OR {p}{n} [category]\nExample: {p}{n} cartoon",
+      en: "{p}{n} or add [cartoon/photo/lofi/sad/islamic/funny/horny/anime]",
     },
   },
 
   onStart: async function ({ api, event, args }) {
-    // Main options for first menu
-    const menuOne = [
-      "🎭 𝗙𝘂𝗻𝗻𝘆 𝘃𝗶𝗱𝗲𝗼",
-      "🕌 𝗜𝘀𝗹𝗮𝗺𝗶𝗰 𝘃𝗶𝗱𝗲𝗼",
-      "😢 𝗦𝗮𝗱 𝘃𝗶𝗱𝗲𝗼",
-      "🌸 𝗔𝗻𝗶𝗺𝗲 𝘃𝗶𝗱𝗲𝗼",
-      "🎨 𝗖𝗮𝗿𝘁𝗼𝗼𝗻 𝘃𝗶𝗱𝗲𝗼",
-      "🎶 𝗟𝗼𝗙𝗶 𝗩𝗶𝗱𝗲𝗼",
-      "🔥 𝗛𝗼𝗿𝗻𝘆 𝘃𝗶𝗱𝗲𝗼",
-      "❤️ 𝗖𝗼𝘂𝗽𝗹𝗲 𝗩𝗶𝗱𝗲𝗼",
-      "🌼 𝗙𝗹𝗼𝘄𝗲𝗿 𝗩𝗶𝗱𝗲𝗼",
-      "🌀 𝗥𝗮𝗻𝗱𝗼𝗺 𝗣𝗵𝗼𝘁𝗼",
-    ];
+    function getAlbumMenu1() {
+      const albumOptions = [
+        "𝐅𝐮𝐧𝐧𝐲 𝐕𝐢𝐝𝐞𝐨 😂",
+        "𝐈𝐬𝐥𝐚𝐦𝐢𝐜 𝐕𝐢𝐝𝐞𝐨 🌙",
+        "𝐒𝐚𝐝 𝐕𝐢𝐝𝐞𝐨 💔",
+        "𝐀𝐧𝐢𝐦𝐞 𝐕𝐢𝐝𝐞𝐨 🌸",
+        "𝐂𝐚𝐫𝐭𝐨𝐨𝐧 𝐕𝐢𝐝𝐞𝐨 🎨",
+        "𝐋𝐨𝐅𝐢 𝐕𝐢𝐝𝐞𝐨 🎧",
+        "𝐇𝐨𝐫𝐧𝐲 𝐕𝐢𝐝𝐞𝐨 🔥",
+        "𝐂𝐨𝐮𝐩𝐥𝐞 𝐕𝐢𝐝𝐞𝐨 💑",
+        "𝐅𝐥𝐨𝐰𝐞𝐫 𝐕𝐢𝐝𝐞𝐨 🌹",
+        "𝐑𝐚𝐧𝐝𝐨𝐦 𝐏𝐡𝐨𝐭𝐨 📸",
+      ];
+      return `
+╭────────────────────────╮
+💖 𝐏𝐥𝐞𝐚𝐬𝐞 𝐂𝐡𝐨𝐨𝐬𝐞 𝐚𝐧 𝐀𝐥𝐛𝐮𝐦 💖
 
-    // Second page menu (optional)
-    const menuTwo = [
-      "✨ 𝗔𝗲𝘀𝘁𝗵𝗲𝘁𝗶𝗰 𝗩𝗶𝗱𝗲𝗼",
-      "⚡ 𝗦𝗶𝗴𝗺𝗮 𝗥𝘂𝗹𝗲",
-      "🎤 𝗟𝘆𝗿𝗶𝗰𝘀 𝗩𝗶𝗱𝗲𝗼",
-      "🐱 𝗖𝗮𝘁 𝗩𝗶𝗱𝗲𝗼",
-      "🔞 18+ 𝘃𝗶𝗱𝗲𝗼",
-      "🔥 𝗙𝗿𝗲𝗲 𝗙𝗶𝗿𝗲 𝘃𝗶𝗱𝗲𝗼",
-      "⚽ 𝗙𝗼𝗼𝘁𝗕𝗮𝗹𝗹 𝘃𝗶𝗱𝗲𝗼",
-      "👧 𝗚𝗶𝗿𝗹 𝘃𝗶𝗱𝗲𝗼",
-      "👫 𝗙𝗿𝗶𝗲𝗻𝗱𝘀 𝗩𝗶𝗱𝗲𝗼",
-    ];
+${albumOptions.map((opt, i) => `➤ ${i + 1}. ${opt}`).join("\n")}
 
-    // Function to create a pretty styled menu string
-    const buildMenu = (arr, startIndex = 1) => {
-      let str ="╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮\n";
-      str += ". │         🎬 𝗥𝗔𝗛𝗔𝗗 𝗔𝗟𝗕𝗨𝗠 🎬      │\n";
-      str += ". ╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯\n\n";
-      arr.forEach((item, idx) => {
-        str += `⮞  ${startIndex + idx}. ${item}\n`;
-      });
-      str +=
-        "\n✍️ 𝗥𝗲𝗽𝗹𝘆 𝗮 𝗻𝘂𝗺𝗯𝗲𝗿 𝘁𝗼 𝗰𝗵𝗼𝗼𝘀𝗲 𝗮𝗹𝗯𝘂𝗺\n" +
-        "🆔 𝗦𝗲𝗻𝗱 𝗻𝗮𝗺𝗲 𝗮𝗳𝘁𝗲𝗿 𝗰𝗼𝗺𝗺𝗮𝗻𝗱 𝗳𝗼𝗿 𝗾𝘂𝗶𝗰𝗸 𝗿𝗲𝘀𝘂𝗹𝘁\n\n" +
-        "✿━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━✿";
-      return str;
-    };
+╰────────────────────────╯
+Reply with option number.
+`;
+    }
 
-    // If no args, show first menu
+    function getAlbumMenu2() {
+      const albumOptions = [
+        "𝐀𝐞𝐬𝐭𝐡𝐞𝐭𝐢𝐜 𝐕𝐢𝐝𝐞𝐨 😎",
+        "𝐒𝐢𝐠𝐦𝐚 𝐑𝐮𝐥𝐞 🦾",
+        "𝐋𝐲𝐫𝐢𝐜𝐬 𝐕𝐢𝐝𝐞𝐨 🎤",
+        "𝐂𝐚𝐭 𝐕𝐢𝐝𝐞𝐨 🐱",
+        "18+ 𝐕𝐢𝐝𝐞𝐨 🔞",
+        "𝐅𝐫𝐞𝐞 𝐅𝐢𝐫𝐞 𝐕𝐢𝐝𝐞𝐨 🔥",
+        "𝐅𝐨𝐨𝐭𝐁𝐚𝐥𝐥 𝐕𝐢𝐝𝐞𝐨 ⚽",
+        "𝐆𝐢𝐫𝐥 𝐕𝐢𝐝𝐞𝐨 💃",
+        "𝐅𝐫𝐢𝐞𝐧𝐝𝐬 𝐕𝐢𝐝𝐞𝐨 🤝",
+      ];
+      return `
+╭────────────────────────╮
+💖 𝐀𝐥𝐛𝐮𝐦 𝐏𝐚𝐠𝐞 𝟐 - 𝐂𝐡𝐨𝐨𝐬𝐞 𝐎𝐧𝐞 💖
+
+${albumOptions.map((opt, i) => `➤ ${i + 11}. ${opt}`).join("\n")}
+
+╰────────────────────────╯
+Reply with option number.
+`;
+    }
+
     if (!args[0]) {
-      api.setMessageReaction("🎉", event.messageID, () => {}, true);
-      const msg = buildMenu(menuOne, 1);
-      return api.sendMessage(
-        msg,
-        event.threadID,
-        (err, info) => {
-          if (err) return console.error(err);
-          global.GoatBot.onReply.set(info.messageID, {
-            commandName: this.config.name,
-            author: event.senderID,
-            type: "page1",
-            messageID: info.messageID,
-            options: menuOne,
-          });
-        },
-        event.messageID
-      );
+      api.setMessageReaction("😘", event.messageID, () => {}, true);
+      return api.sendMessage(getAlbumMenu1(), event.threadID, event.messageID);
     }
 
-    // If arg is 2, show second menu
     if (args[0] === "2") {
-      api.setMessageReaction("🎉", event.messageID, () => {}, true);
-      const msg = buildMenu(menuTwo, 11);
+      api.setMessageReaction("😘", event.messageID, () => {}, true);
+      return api.sendMessage(getAlbumMenu2(), event.threadID, event.messageID);
+    }
+
+    // If user sends invalid album number, ignore
+    if (!isNaN(args[0]) && (parseInt(args[0]) < 1 || parseInt(args[0]) > 19)) {
       return api.sendMessage(
-        msg,
-        event.threadID,
-        (err, info) => {
-          if (err) return console.error(err);
-          global.GoatBot.onReply.set(info.messageID, {
-            commandName: this.config.name,
-            author: event.senderID,
-            type: "page2",
-            messageID: info.messageID,
-            options: menuTwo,
-          });
-        },
-        event.messageID
-      );
-    }
-
-    // Handle direct category name usage
-    const category = args[0].toLowerCase();
-
-    // List of valid categories with query params
-    const validCategories = {
-      funny: "funny",
-      islamic: "islamic",
-      sad: "sad",
-      anime: "anime",
-      cartoon: "cartoon",
-      lofi: "lofi",
-      horny: "horny",
-      couple: "love",
-      flower: "flower",
-      random: "photo",
-      aesthetic: "aesthetic",
-      sigma: "sigma",
-      lyrics: "lyrics",
-      cat: "cat",
-      "18+": "sex",
-      ff: "ff",
-      football: "football",
-      girl: "girl",
-      friends: "friend",
-    };
-
-    if (!validCategories[category]) {
-      return api.sendMessage(
-        "❌ Invalid category! Use the command without arguments to see the list.",
+        "❌ Invalid album number! Please choose between 1 - 19.",
         event.threadID,
         event.messageID
       );
     }
 
-    api.setMessageReaction("🔍", event.messageID, () => {}, true);
-
-    try {
-      const baseUrl = await baseApiUrl();
-      const res = await axios.get(`${baseUrl}/album?type=${validCategories[category]}`);
-      const videoUrl = res.data.data;
-
-      // Download the media before sending
-      const ext = path.extname(videoUrl);
-      const filename = path.join(__dirname, `assets/album_${Date.now()}${ext}`);
-
-      const mediaResponse = await axios.get(videoUrl, {
-        responseType: "arraybuffer",
-        headers: { "User-Agent": "Mozilla/5.0" },
-      });
-      fs.writeFileSync(filename, Buffer.from(mediaResponse.data, "binary"));
-
-      const caption = `
-╭━━━━━━━━━━━━━━━━━━━━━━━╮
-┃ 🎬 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 𝗔𝗹𝗯𝘂𝗺 ┃
-┣━━━━━━━━━━━━━━━━━━━━━━━┫
-┃ 📁 𝗖𝗮𝘁𝗲𝗴𝗼𝗿𝘆: ${category.toUpperCase()}      
-┃ 📥 𝗗𝗼𝘄𝗻𝗹𝗼𝗮𝗱 𝗟𝗶𝗻𝗸: ${videoUrl}
-╰━━━━━━━━━━━━━━━━━━━━━━━╯
-      `.trim();
-
-      await api.sendMessage(
-        {
-          body: caption,
-          attachment: fs.createReadStream(filename),
-        },
-        event.threadID,
-        () => fs.unlinkSync(filename),
-        event.messageID
-      );
-    } catch (error) {
-      console.error(error);
-      api.sendMessage(
-        "❌ অনুগ্রহ করে সঠিক ক্যাটাগরি নির্বাচন করুন বা পরে আবার চেষ্টা করুন।",
-        event.threadID,
-        event.messageID
-      );
-    }
+    // Just react for other args
+    api.setMessageReaction("👀", event.messageID, () => {}, true);
   },
 
   onReply: async function ({ api, event, Reply }) {
-    if (event.senderID !== Reply.author) return;
+    const admin = "100044327656712";
+    api.unsendMessage(Reply.messageID);
+    if (event.type === "message_reply") {
+      const reply = parseInt(event.body);
+      if (isNaN(reply) || reply < 1 || reply > 19) {
+        return api.sendMessage(
+          "❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗿𝗲𝗽𝗹𝘆 𝘄𝗶𝘁𝗵 𝗮 𝗻𝘂𝗺𝗯𝗲𝗿 𝗯𝗲𝘁𝘄𝗲𝗲𝗻 𝟭 - 𝟭𝟵 ❗",
+          event.threadID,
+          event.messageID
+        );
+      }
 
-    const reply = parseInt(event.body);
-    if (isNaN(reply)) {
-      return api.sendMessage(
-        "❌ ভুল ইনপুট! অনুগ্রহ করে ১ থেকে ১০ (বা ১১ থেকে ১৯) এর মধ্যে একটি নম্বর দিন।",
-        event.threadID,
-        event.messageID
-      );
-    }
+      let query = "";
+      let cp = "";
 
-    let selectedOption;
-    if (Reply.type === "page1" && reply >= 1 && reply <= 10) {
-      selectedOption = Reply.options[reply - 1];
-    } else if (Reply.type === "page2" && reply >= 11 && reply <= 19) {
-      selectedOption = Reply.options[reply - 11];
-    } else {
-      return api.sendMessage(
-        "❌ Invalid selection number.",
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    const categoryKey = selectedOption
-      .toLowerCase()
-      .replace(/[^\w]/g, "")
-      .replace("video", "")
-      .trim();
-
-    // Trigger album command again with selected category
-    return this.onStart({
-      api,
-      event,
-      args: [categoryKey],
-    });
-  },
-};
+      switch (reply) {
+        case 1:
+          query = "funny";
+          cp = `
+╔═════ 『🎬』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙐𝙉𝙉𝙔 𝙑𝙄𝘿𝙀𝙊 𝙏𝙄𝙈𝙀 💥
+🤣 𝑳𝒂𝒖𝒈𝒉 𝒐𝒖𝒕 𝒍𝒐𝒖𝒅 𝒘𝒊𝒕𝒉 𝒄𝒖𝒕𝒆 𝒗𝒊𝒃𝒆𝒔
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 2:
+          query = "islamic";
+          cp = `
+╔═════ 『🌙』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙄𝙎𝙇𝘼𝙈𝙄𝘾 𝙑𝙄𝘿𝙀𝙊 💫
+🙏 𝘽𝙡𝙚𝙨𝙨𝙚𝙙 𝙢𝙤𝙢𝙚𝙣𝙩𝙨 𝙛𝙤𝙧 𝙮𝙤𝙪
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 3:
+          query = "sad";
+          cp = `
+╔═════ 『💔』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝘼𝘿 𝙑𝙄𝘿𝙀𝙊 💧
+🥺 𝙈𝙚𝙢𝙤𝙧𝙞𝙚𝙨 𝙩𝙝𝙖𝙩 𝙩𝙤𝙪𝙘𝙝 𝙮𝙤𝙪
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 4:
+          query = "anime";
+          cp = `
+╔═════ 『🌸』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙉𝙄𝙈𝙀 𝙑𝙄𝘿𝙀𝙊 🌺
+😘 𝙁𝙤𝙧 𝙖𝙣𝙞𝙢𝙚 𝙡𝙤𝙫𝙚𝙧𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 5:
+          query = "video";
+          cp = `
+╔═════ 『🎨』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙍𝙏𝙊𝙊𝙉 𝙑𝙄𝘿𝙀𝙊 🎭
+😇 𝘾𝙖𝙧𝙩𝙤𝙤𝙣𝙨 𝙛𝙤𝙧 𝙠𝙞𝙙𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 6:
+          query = "lofi";
+          cp = `
+╔═════ 『🎧』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙁𝙄 𝙈𝙐𝙎𝙄𝘾 🎶
+🔊 𝘾𝙝𝙞𝙡𝙡 𝙖𝙣𝙙 𝙧𝙚𝙡𝙖𝙭
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 7:
+          if (event.senderID !== admin) return;
+          query = "horny";
+          cp = `
+╔═════ 『🔥』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙃𝙊𝙍𝙉𝙔 𝙑𝙄𝘿𝙀𝙊 🔥
+🥵 𝙎𝙥𝙚𝙘𝙞𝙖𝙡 𝙛𝙤𝙧 𝙮𝙤𝙪
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 8:
+          query = "love";
+          cp = `
+╔═════ 『😍』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙑𝙀 𝙑𝙄𝘿𝙀𝙊 💝
+💕 𝙁𝙤𝙧 𝙡𝙤𝙫𝙚𝙧𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 9:
+          query = "baby";
+          cp = `
+╔═════ 『🧸』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝙐𝙏𝙀 𝘽𝘼𝘽𝙔 𝙑𝙄𝘿𝙀𝙊 🍼
+🧑‍🍼 𝘾𝙪𝙩𝙚 𝙖𝙣𝙙 𝙘𝙤𝙢𝙛𝙤𝙧𝙩𝙞𝙣𝙜
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 10:
+          query = "photo";
+          cp = `
+╔═════ 『📸』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙍𝘼𝙉𝘿𝙊𝙈 𝙋𝙃𝙊𝙏𝙊 𝙎𝙃𝙊𝙒 🎞️
+😙 𝙍𝙖𝙣𝙙𝙤𝙢 𝙥𝙞𝙘𝙩𝙪𝙧𝙚𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 11:
+          query = "aesthetic";
+          cp = `
+╔═════ 『😎』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙀𝙎𝙏𝙃𝙀𝙏𝙄𝘾 𝙑𝙄𝘿𝙀𝙊 ✨
+🌟 𝙎𝙩𝙮𝙡𝙞𝙨𝙝 𝙖𝙣𝙙 𝙘𝙤𝙤𝙡
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 12:
+          query = "sigma";
+          cp = `
+╔═════ 『🦾』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙄𝙂𝙈𝘼 𝙍𝙐𝙇𝙀 𝙑𝙄𝘿𝙀𝙊 💪
+🐤 𝙁𝙤𝙧 𝙩𝙝𝙚 𝙧𝙚𝙖𝙡 𝙤𝙣𝙚𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 13:
+          query = "lyrics";
+          cp = `
+╔═════ 『🎤』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙔𝙍𝙄𝘾𝙎 𝙑𝙄𝘿𝙀𝙊 🥰
+🎶 𝙎𝙤𝙪𝙡 𝙢𝙚𝙡𝙩𝙞𝙣𝙜 𝙩𝙪𝙣𝙚𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 14:
+          query = "cat";
+          cp = `
+╔═════ 『🐱』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙏 𝙑𝙄𝘿𝙀𝙊 😽
+😙 𝙁𝙤𝙧 𝙘𝙖𝙩 𝙡𝙤𝙫𝙚𝙧𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 15:
+          if (event.senderID !== admin) return;
+          query = "sex";
+          cp = `
+╔═════ 『🔞』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙀𝙓 𝙑𝙄𝘿𝙀𝙊 🔥
+😙 𝙁𝙤𝙧 𝙢𝙖𝙩𝙪𝙧𝙚 𝙖𝙪𝙙𝙞𝙚𝙣𝙘𝙚
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 16:
+          query = "ff";
+          cp = `
+╔═════ 『🔥』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙍𝙀𝙀 𝙁𝙄𝙍𝙀 𝙑𝙄𝘿𝙀𝙊 🎮
+😙 𝙁𝙤𝙧 𝙜𝙖𝙢𝙚𝙧𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 17:
+          query = "football";
+          cp = `
+╔═════ 『⚽』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙊𝙊𝙏𝘽𝘼𝙇𝙇 𝙑𝙄𝘿𝙀𝙊 🏆
+😙 𝙁𝙤𝙧 𝙨𝙥𝙤𝙧𝙩𝙨 𝙛𝙖𝙣𝙨
+╚═════ 『✨』═════╝
+`;
+          break;
+        case 18:
+          query = "girl";
+          cp =
