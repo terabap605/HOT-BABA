@@ -56,7 +56,7 @@ module.exports.onStart = async function ({ api, args, event }) {
     });
 
     const infoMessage =
-`╭━━『 𝙏𝙄𝙆𝙏𝙊𝙆 𝙎𝙀𝘼𝙍𝘾𝙃 - 𝙍𝘼𝙃𝘼𝘿 』━━╮
+`╭━━『𝙏𝙄𝙆𝙏𝙊𝙆 𝙎𝙀𝘼𝙍𝘾𝙃』━━╮
 📌 𝙏𝙞𝙩𝙡𝙚: ${videoData.title || "No Title"}
 👤 𝙐𝙨𝙚𝙧: @${videoData.author || "unknown"}
 🎯 𝙏𝙤𝙥𝙞𝙘: ${search} - ${searchLimit}
