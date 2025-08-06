@@ -1,7 +1,4 @@
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
 
 async function getStreamFromURL(url) {
   const response = await axios.get(url, { responseType: 'stream' });
@@ -21,50 +18,65 @@ async function fetchTikTokVideos(query) {
 module.exports = {
   config: {
     name: "anisearch",
-    aliases: [],
+    aliases: ["animeedit", "animevid"],
     author: "Vex_kshitiz",
-    version: "1.0",
+    version: "1.1",
     shortDescription: {
-      en: "get anime edit",
+      en: "Search and fetch anime edit TikTok videos",
     },
     longDescription: {
-      en: "search for anime edits video",
+      en: "Search for anime edit videos on TikTok and send them with a stylish message format",
     },
     category: "media",
     guide: {
-      en: "{p}{n} [query]",
+      en: "{p}{n} <search keywords>",
     },
   },
+
   onStart: async function ({ api, event, args }) {
-     api.setMessageReaction("✨", event.messageID, (err) => {}, true);
-    const query = args.join(' ');
-    const modifiedQuery = `${query} anime edit`;
+    api.setMessageReaction("✨", event.messageID, () => {}, true);
 
-    const videos = await fetchTikTokVideos(modifiedQuery);
-
-    if (!videos || videos.length === 0) {
-      api.sendMessage({ body: `${query} not found.` }, event.threadID, event.messageID);
-      return;
+    const rawQuery = args.join(" ").trim();
+    if (!rawQuery) {
+      return api.sendMessage("❗ Please enter keywords to search anime edits.", event.threadID, event.messageID);
     }
 
-    const selectedVideo = videos[Math.floor(Math.random() * videos.length)];
-    const videoUrl = selectedVideo.videoUrl;
+    const query = `${rawQuery} anime edit`;
+    const videos = await fetchTikTokVideos(query);
 
-    if (!videoUrl) {
-      api.sendMessage({ body: 'Error: Video not found.' }, event.threadID, event.messageID);
-      return;
+    if (!videos || videos.length === 0) {
+      return api.sendMessage(`❌ Sorry, no anime edit videos found for:\n» ${rawQuery}`, event.threadID, event.messageID);
+    }
+
+    const video = videos[Math.floor(Math.random() * videos.length)];
+    if (!video.videoUrl) {
+      return api.sendMessage("⚠️ Error: Couldn't find a valid video URL.", event.threadID, event.messageID);
     }
 
     try {
-      const videoStream = await getStreamFromURL(videoUrl);
+      const videoStream = await getStreamFromURL(video.videoUrl);
 
-      await api.sendMessage({
-        body: ``,
-        attachment: videoStream,
-      }, event.threadID, event.messageID);
+      const message = `
+╭───『 𝙍𝘼𝙃𝘼𝘿 𝘼𝗻𝗶𝗺𝗲 𝗘𝗱𝗶𝘁 』───╮
+📌 𝗦𝗲𝗮𝗿𝗰𝗵: ${rawQuery}
+🎞️ 𝗩𝗶𝗱𝗲𝗼 𝗧𝗶𝘁𝗹𝗲: ${video.title || "N/A"}
+🌟 𝗩𝗶𝗲𝘄𝘀: ${video.viewCount || "Unknown"}
+🔗 𝗩𝗶𝗱𝗲𝗼 𝗨𝗥𝗟: ${video.videoUrl}
+╰─────── 𝗥𝗔𝗛𝗔𝗗 𝗕𝗢𝗧 ───────╯
+      `;
+
+      await api.sendMessage(
+        {
+          body: message,
+          attachment: videoStream,
+        },
+        event.threadID,
+        event.messageID
+      );
+
     } catch (error) {
       console.error(error);
-      api.sendMessage({ body: 'An error occurred while processing the video.\nPlease try again later.' }, event.threadID, event.messageID);
+      api.sendMessage("❗ Error occured while fetching the video. Try again later.", event.threadID, event.messageID);
     }
   },
 };
