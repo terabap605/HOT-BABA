@@ -1,270 +1,302 @@
 const axios = require("axios");
-const path = require("path");
 const fs = require("fs");
+const path = require("path");
+
 const baseApiUrl = async () => {
-  const base = await axios.get(
-    `https://raw.githubusercontent.com/Mostakim0978/D1PT0/refs/heads/main/baseApiUrl.json`
-  );
-  return base.data.api;
+  // Apnar base API URL ekhane
+  return "https://your-base-api-url.com"; // Replace kore deben apnar real API url diye
 };
 
 module.exports = {
   config: {
     name: "album",
-    version: "1.0.0",
+    version: "1.0",
     role: 0,
     author: "Dipto",
-    description: "Displays album options for selection.",
-    category: "Media",
+    description: "Send album video/photo options",
     countDown: 5,
-    guide: {
-      en: "{p}{n} or add [cartoon/photo/lofi/sad/islamic/funny/horny/anime]",
-    },
   },
 
-  onStart: async function ({ api, event, args }) {
-    function getAlbumMenu1() {
-      const albumOptions = [
-        "𝐅𝐮𝐧𝐧𝐲 𝐕𝐢𝐝𝐞𝐨 😂",
-        "𝐈𝐬𝐥𝐚𝐦𝐢𝐜 𝐕𝐢𝐝𝐞𝐨 🌙",
-        "𝐒𝐚𝐝 𝐕𝐢𝐝𝐞𝐨 💔",
-        "𝐀𝐧𝐢𝐦𝐞 𝐕𝐢𝐝𝐞𝐨 🌸",
-        "𝐂𝐚𝐫𝐭𝐨𝐨𝐧 𝐕𝐢𝐝𝐞𝐨 🎨",
-        "𝐋𝐨𝐅𝐢 𝐕𝐢𝐝𝐞𝐨 🎧",
-        "𝐇𝐨𝐫𝐧𝐲 𝐕𝐢𝐝𝐞𝐨 🔥",
-        "𝐂𝐨𝐮𝐩𝐥𝐞 𝐕𝐢𝐝𝐞𝐨 💑",
-        "𝐅𝐥𝐨𝐰𝐞𝐫 𝐕𝐢𝐝𝐞𝐨 🌹",
-        "𝐑𝐚𝐧𝐝𝐨𝐦 𝐏𝐡𝐨𝐭𝐨 📸",
-      ];
-      return `
-╭────────────────────────╮
-💖 𝐏𝐥𝐞𝐚𝐬𝐞 𝐂𝐡𝐨𝐨𝐬𝐞 𝐚𝐧 𝐀𝐥𝐛𝐮𝐦 💖
-
-${albumOptions.map((opt, i) => `➤ ${i + 1}. ${opt}`).join("\n")}
-
-╰────────────────────────╯
-Reply with option number.
-`;
-    }
-
-    function getAlbumMenu2() {
-      const albumOptions = [
-        "𝐀𝐞𝐬𝐭𝐡𝐞𝐭𝐢𝐜 𝐕𝐢𝐝𝐞𝐨 😎",
-        "𝐒𝐢𝐠𝐦𝐚 𝐑𝐮𝐥𝐞 🦾",
-        "𝐋𝐲𝐫𝐢𝐜𝐬 𝐕𝐢𝐝𝐞𝐨 🎤",
-        "𝐂𝐚𝐭 𝐕𝐢𝐝𝐞𝐨 🐱",
-        "18+ 𝐕𝐢𝐝𝐞𝐨 🔞",
-        "𝐅𝐫𝐞𝐞 𝐅𝐢𝐫𝐞 𝐕𝐢𝐝𝐞𝐨 🔥",
-        "𝐅𝐨𝐨𝐭𝐁𝐚𝐥𝐥 𝐕𝐢𝐝𝐞𝐨 ⚽",
-        "𝐆𝐢𝐫𝐥 𝐕𝐢𝐝𝐞𝐨 💃",
-        "𝐅𝐫𝐢𝐞𝐧𝐝𝐬 𝐕𝐢𝐝𝐞𝐨 🤝",
-      ];
-      return `
-╭────────────────────────╮
-💖 𝐀𝐥𝐛𝐮𝐦 𝐏𝐚𝐠𝐞 𝟐 - 𝐂𝐡𝐨𝐨𝐬𝐞 𝐎𝐧𝐞 💖
-
-${albumOptions.map((opt, i) => `➤ ${i + 11}. ${opt}`).join("\n")}
-
-╰────────────────────────╯
-Reply with option number.
-`;
-    }
-
-    if (!args[0]) {
-      api.setMessageReaction("😘", event.messageID, () => {}, true);
-      return api.sendMessage(getAlbumMenu1(), event.threadID, event.messageID);
-    }
-
-    if (args[0] === "2") {
-      api.setMessageReaction("😘", event.messageID, () => {}, true);
-      return api.sendMessage(getAlbumMenu2(), event.threadID, event.messageID);
-    }
-
-    // If user sends invalid album number, ignore
-    if (!isNaN(args[0]) && (parseInt(args[0]) < 1 || parseInt(args[0]) > 19)) {
-      return api.sendMessage(
-        "❌ Invalid album number! Please choose between 1 - 19.",
-        event.threadID,
-        event.messageID
-      );
-    }
-
-    // Just react for other args
-    api.setMessageReaction("👀", event.messageID, () => {}, true);
+  onStart: async function ({ api, event }) {
+    const albumList = `
+╔═════ 『🎬』═════╗
+💖 𝐍𝐀𝐖 𝐁𝐀𝐁𝐘 𝐀𝐋𝐁𝐔𝐌 💥
+1. Funny
+2. Islamic
+3. Sad
+4. Anime
+5. Cartoon
+6. Lofi
+7. Horny (Admin only)
+8. Love
+9. Baby
+10. Photo
+11. Aesthetic
+12. Sigma
+13. Lyrics
+14. Cat
+15. Sex (Admin only)
+16. Free Fire
+17. Football
+18. Girl
+19. Friend
+╚═════ 『✨』═════╝
+Reply with number (1-19)
+    `;
+    return api.sendMessage(albumList, event.threadID, event.messageID);
   },
 
   onReply: async function ({ api, event, Reply }) {
     const admin = "100044327656712";
     api.unsendMessage(Reply.messageID);
-    if (event.type === "message_reply") {
-      const reply = parseInt(event.body);
-      if (isNaN(reply) || reply < 1 || reply > 19) {
-        return api.sendMessage(
-          "❌ 𝗣𝗹𝗲𝗮𝘀𝗲 𝗿𝗲𝗽𝗹𝘆 𝘄𝗶𝘁𝗵 𝗮 𝗻𝘂𝗺𝗯𝗲𝗿 𝗯𝗲𝘁𝘄𝗲𝗲𝗻 𝟭 - 𝟭𝟵 ❗",
-          event.threadID,
-          event.messageID
-        );
-      }
 
-      let query = "";
-      let cp = "";
+    if (event.type !== "message_reply")
+      return api.sendMessage(
+        "❌ Please reply to the album message with a number 1-19!",
+        event.threadID,
+        event.messageID
+      );
 
-      switch (reply) {
-        case 1:
-          query = "funny";
-          cp = `
+    const reply = parseInt(event.body);
+    if (isNaN(reply) || reply < 1 || reply > 19) {
+      return api.sendMessage(
+        "❌ Please reply with a valid number between 1 and 19!",
+        event.threadID,
+        event.messageID
+      );
+    }
+
+    let query = "";
+    let cp = "";
+
+    switch (reply) {
+      case 1:
+        query = "funny";
+        cp = `
 ╔═════ 『🎬』═════╗
 💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙐𝙉𝙉𝙔 𝙑𝙄𝘿𝙀𝙊 𝙏𝙄𝙈𝙀 💥
 🤣 𝑳𝒂𝒖𝒈𝒉 𝒐𝒖𝒕 𝒍𝒐𝒖𝒅 𝒘𝒊𝒕𝒉 𝒄𝒖𝒕𝒆 𝒗𝒊𝒃𝒆𝒔
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 2:
-          query = "islamic";
-          cp = `
+        break;
+
+      case 2:
+        query = "islamic";
+        cp = `
 ╔═════ 『🌙』═════╗
 💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙄𝙎𝙇𝘼𝙈𝙄𝘾 𝙑𝙄𝘿𝙀𝙊 💫
 🙏 𝘽𝙡𝙚𝙨𝙨𝙚𝙙 𝙢𝙤𝙢𝙚𝙣𝙩𝙨 𝙛𝙤𝙧 𝙮𝙤𝙪
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 3:
-          query = "sad";
-          cp = `
+        break;
+
+      case 3:
+        query = "sad";
+        cp = `
 ╔═════ 『💔』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝘼𝘿 𝙑𝙄𝘿𝙀𝙊 💧
-🥺 𝙈𝙚𝙢𝙤𝙧𝙞𝙚𝙨 𝙩𝙝𝙖𝙩 𝙩𝙤𝙪𝙘𝙝 𝙮𝙤𝙪
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝘼𝘿 𝙑𝙄𝘿𝙀𝙊 💔
+🥺 𝙏𝙤𝙪𝙘𝙝𝙞𝙣𝙜 𝙮𝙤𝙪𝙧 𝙝𝙚𝙖𝙧𝙩
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 4:
-          query = "anime";
-          cp = `
+        break;
+
+      case 4:
+        query = "anime";
+        cp = `
 ╔═════ 『🌸』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙉𝙄𝙈𝙀 𝙑𝙄𝘿𝙀𝙊 🌺
-😘 𝙁𝙤𝙧 𝙖𝙣𝙞𝙢𝙚 𝙡𝙤𝙫𝙚𝙧𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙉𝙄𝙈𝙀 𝙑𝙄𝘿𝙀𝙊 🌸
+😘 𝙎𝙥𝙧𝙚𝙖𝙙 𝙩𝙝𝙚 𝙡𝙤𝙫𝙚 𝙤𝙛 𝙖𝙣𝙞𝙢𝙚
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 5:
-          query = "video";
-          cp = `
+        break;
+
+      case 5:
+        query = "cartoon";
+        cp = `
 ╔═════ 『🎨』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙍𝙏𝙊𝙊𝙉 𝙑𝙄𝘿𝙀𝙊 🎭
-😇 𝘾𝙖𝙧𝙩𝙤𝙤𝙣𝙨 𝙛𝙤𝙧 𝙠𝙞𝙙𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙍𝙏𝙊𝙊𝙉 𝙑𝙄𝘿𝙀𝙊 🎨
+😇 𝙁𝙪𝙣 𝙖𝙣𝙙 𝙘𝙤𝙡𝙤𝙧𝙛𝙪𝙡 𝙢𝙤𝙢𝙚𝙣𝙩𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 6:
-          query = "lofi";
-          cp = `
+        break;
+
+      case 6:
+        query = "lofi";
+        cp = `
 ╔═════ 『🎧』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙁𝙄 𝙈𝙐𝙎𝙄𝘾 🎶
-🔊 𝘾𝙝𝙞𝙡𝙡 𝙖𝙣𝙙 𝙧𝙚𝙡𝙖𝙭
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙁𝙄 𝙑𝙄𝘿𝙀𝙊 🎧
+🔊 𝙍𝙚𝙡𝙖𝙭 𝙬𝙞𝙩𝙝 𝙩𝙝𝙚 𝙗𝙚𝙖𝙩𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 7:
-          if (event.senderID !== admin) return;
-          query = "horny";
-          cp = `
+        break;
+
+      case 7:
+        if (event.senderID !== admin) return;
+        query = "horny";
+        cp = `
 ╔═════ 『🔥』═════╗
 💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙃𝙊𝙍𝙉𝙔 𝙑𝙄𝘿𝙀𝙊 🔥
-🥵 𝙎𝙥𝙚𝙘𝙞𝙖𝙡 𝙛𝙤𝙧 𝙮𝙤𝙪
+🥵 𝙎𝙥𝙚𝙘𝙞𝙖𝙡 𝙛𝙤𝙧 𝙖𝙙𝙢𝙞𝙣
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 8:
-          query = "love";
-          cp = `
+        break;
+
+      case 8:
+        query = "love";
+        cp = `
 ╔═════ 『😍』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙑𝙀 𝙑𝙄𝘿𝙀𝙊 💝
-💕 𝙁𝙤𝙧 𝙡𝙤𝙫𝙚𝙧𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙊𝙑𝙀 𝙑𝙄𝘿𝙀𝙊 😍
+💝 𝙁𝙚𝙚𝙡 𝙩𝙝𝙚 𝙡𝙤𝙫𝙚
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 9:
-          query = "baby";
-          cp = `
+        break;
+
+      case 9:
+        query = "baby";
+        cp = `
 ╔═════ 『🧸』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝙐𝙏𝙀 𝘽𝘼𝘽𝙔 𝙑𝙄𝘿𝙀𝙊 🍼
-🧑‍🍼 𝘾𝙪𝙩𝙚 𝙖𝙣𝙙 𝙘𝙤𝙢𝙛𝙤𝙧𝙩𝙞𝙣𝙜
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝙐𝙏𝙀 𝘽𝘼𝘽𝙔 𝙑𝙄𝘿𝙀𝙊 🧸
+🧑‍🍼 𝘾𝙪𝙩𝙚𝙨𝙩 𝙗𝙖𝙗𝙮 𝙫𝙞𝙗𝙚𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 10:
-          query = "photo";
-          cp = `
+        break;
+
+      case 10:
+        query = "photo";
+        cp = `
 ╔═════ 『📸』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙍𝘼𝙉𝘿𝙊𝙈 𝙋𝙃𝙊𝙏𝙊 𝙎𝙃𝙊𝙒 🎞️
-😙 𝙍𝙖𝙣𝙙𝙤𝙢 𝙥𝙞𝙘𝙩𝙪𝙧𝙚𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙍𝘼𝙉𝘿𝙊𝙈 𝙋𝙃𝙊𝙏𝙊 📸
+😙 𝙍𝙖𝙣𝙙𝙤𝙢 𝙗𝙚𝙖𝙪𝙩𝙞𝙛𝙪𝙡 𝙥𝙝𝙤𝙩𝙤𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 11:
-          query = "aesthetic";
-          cp = `
+        break;
+
+      case 11:
+        query = "aesthetic";
+        cp = `
 ╔═════ 『😎』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙀𝙎𝙏𝙃𝙀𝙏𝙄𝘾 𝙑𝙄𝘿𝙀𝙊 ✨
-🌟 𝙎𝙩𝙮𝙡𝙞𝙨𝙝 𝙖𝙣𝙙 𝙘𝙤𝙤𝙡
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘼𝙀𝙎𝙏𝙃𝙀𝙏𝙄𝘾 𝙑𝙄𝘿𝙀𝙊 😎
+✨ 𝙎𝙩𝙮𝙡𝙞𝙨𝙝 𝙖𝙣𝙙 𝙘𝙝𝙞𝙘 𝙢𝙤𝙢𝙚𝙣𝙩𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 12:
-          query = "sigma";
-          cp = `
+        break;
+
+      case 12:
+        query = "sigma";
+        cp = `
 ╔═════ 『🦾』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙄𝙂𝙈𝘼 𝙍𝙐𝙇𝙀 𝙑𝙄𝘿𝙀𝙊 💪
-🐤 𝙁𝙤𝙧 𝙩𝙝𝙚 𝙧𝙚𝙖𝙡 𝙤𝙣𝙚𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙄𝙂𝙈𝘼 𝙍𝙐𝙇𝙀 𝙑𝙄𝘿𝙀𝙊 🦾
+🐤 𝙎𝙩𝙧𝙤𝙣𝙜 𝙖𝙣𝙙 𝙛𝙤𝙧𝙘𝙚𝙛𝙪𝙡
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 13:
-          query = "lyrics";
-          cp = `
+        break;
+
+      case 13:
+        query = "lyrics";
+        cp = `
 ╔═════ 『🎤』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙔𝙍𝙄𝘾𝙎 𝙑𝙄𝘿𝙀𝙊 🥰
-🎶 𝙎𝙤𝙪𝙡 𝙢𝙚𝙡𝙩𝙞𝙣𝙜 𝙩𝙪𝙣𝙚𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙇𝙔𝙍𝙄𝘾𝙎 𝙑𝙄𝘿𝙀𝙊 🎤
+🥰 𝙈𝙪𝙨𝙞𝙘 𝙛𝙤𝙧 𝙩𝙝𝙚 𝙨𝙤𝙪𝙡
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 14:
-          query = "cat";
-          cp = `
+        break;
+
+      case 14:
+        query = "cat";
+        cp = `
 ╔═════ 『🐱』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙏 𝙑𝙄𝘿𝙀𝙊 😽
-😙 𝙁𝙤𝙧 𝙘𝙖𝙩 𝙡𝙤𝙫𝙚𝙧𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝘾𝘼𝙏 𝙑𝙄𝘿𝙀𝙊 🐱
+😙 𝘾𝙪𝙩𝙚 𝙘𝙖𝙩 𝙢𝙤𝙢𝙚𝙣𝙩𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 15:
-          if (event.senderID !== admin) return;
-          query = "sex";
-          cp = `
+        break;
+
+      case 15:
+        if (event.senderID !== admin) return;
+        query = "sex";
+        cp = `
 ╔═════ 『🔞』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙀𝙓 𝙑𝙄𝘿𝙀𝙊 🔥
-😙 𝙁𝙤𝙧 𝙢𝙖𝙩𝙪𝙧𝙚 𝙖𝙪𝙙𝙞𝙚𝙣𝙘𝙚
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙎𝙀𝙓 𝙑𝙄𝘿𝙀𝙊 🔞
+😙 𝙁𝙤𝙧 𝙖𝙙𝙢𝙞𝙣 𝙤𝙣𝙡𝙮
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 16:
-          query = "ff";
-          cp = `
+        break;
+
+      case 16:
+        query = "ff";
+        cp = `
 ╔═════ 『🔥』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙍𝙀𝙀 𝙁𝙄𝙍𝙀 𝙑𝙄𝘿𝙀𝙊 🎮
-😙 𝙁𝙤𝙧 𝙜𝙖𝙢𝙚𝙧𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙍𝙀𝙀 𝙁𝙄𝙍𝙀 𝙑𝙄𝘿𝙀𝙊 🔥
+😙 𝙂𝙖𝙢𝙚 𝙏𝙞𝙢𝙚
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 17:
-          query = "football";
-          cp = `
+        break;
+
+      case 17:
+        query = "football";
+        cp = `
 ╔═════ 『⚽』═════╗
-💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙊𝙊𝙏𝘽𝘼𝙇𝙇 𝙑𝙄𝘿𝙀𝙊 🏆
-😙 𝙁𝙤𝙧 𝙨𝙥𝙤𝙧𝙩𝙨 𝙛𝙖𝙣𝙨
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙊𝙊𝙏𝘽𝘼𝙇𝙇 𝙑𝙄𝘿𝙀𝙊 ⚽
+😙 𝙎𝙘𝙤𝙧𝙚 𝙨𝙤𝙢𝙚 𝙜𝙤𝙖𝙡𝙨
 ╚═════ 『✨』═════╝
 `;
-          break;
-        case 18:
-          query = "girl";
-          cp =
+        break;
+
+      case 18:
+        query = "girl";
+        cp = `
+╔═════ 『💃』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙂𝙄𝙍𝙇 𝙑𝙄𝘿𝙀𝙊 💃
+😙 𝙁𝙤𝙧 𝙩𝙝𝙚 𝙡𝙖𝙙𝙞𝙚𝙨
+╚═════ 『✨』═════╝
+`;
+        break;
+
+      case 19:
+        query = "friend";
+        cp = `
+╔═════ 『🤝』═════╗
+💖 𝙉𝘼𝙒 𝘽𝘼𝘽𝙔 𝙁𝙍𝙄𝙀𝙉𝘿𝙎 𝙑𝙄𝘿𝙀𝙊 🤝
+😙 𝙁𝙤𝙧 𝙗𝙚𝙨𝙩 𝙗𝙪𝙙𝙙𝙞𝙚𝙨
+╚═════ 『✨』═════╝
+`;
+        break;
+
+      default:
+        return api.sendMessage(
+          "❌ Please reply with a valid number 1-19!",
+          event.threadID,
+          event.messageID
+        );
+    }
+
+    try {
+      const res = await axios.get(`${await baseApiUrl()}/album?type=${query}`);
+      const mediaUrl = res.data.data;
+
+      const mediaRes = await axios.get(mediaUrl, {
+        responseType: "arraybuffer",
+        headers: { "User-Agent": "Mozilla/5.0" },
+      });
+
+      const filename = path.join(__dirname, `temp_${Date.now()}.mp4`);
+      fs.writeFileSync(filename, Buffer.from(mediaRes.data, "binary"));
+
+      return api.sendMessage(
+        {
+          body: cp + `\n\n📥 Download Link: ${mediaUrl}`,
+          attachment: fs.createReadStream(filename),
+        },
+        event.threadID,
+        () => fs.unlinkSync(filename),
+        event.messageID
+      );
+    } catch (error) {
+      return api.sendMessage(
+        "❌ Error occurred while fetching media.",
+        event.threadID,
+        event.messageID
+      );
+    }
+  },
+};
