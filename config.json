@@ -13,14 +13,14 @@
   "checkApproval": true,
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
-  "nickNameBot": "╭🩷✫🩵➳🪽✫🩷✫🪽╮  🩵─꯭̽─⃝͢Ȟ͢ɛʌ͜͡ɽ⃪͢tɭ̽ɛ⃪s͢s 🦋Bɵ͡",
+  "nickNameBot": "",
   "prefix": "+",
   "adminOnly": {
     "enable": false,
     "ignoreCommand": []
   },
   "adminBot": [
-    "61558576796403",
+    "61578240170502",
     "100089171565869",
     "100001018834621",
     "",
@@ -32,7 +32,7 @@
   "handlerReaction": {
     "enable": true,
     "HandelReactionMain": [
-      "61558576796403",
+      "61578240170502",
     "100089171565869",
     "100001018834621",
     "",
@@ -44,7 +44,7 @@
   },
   "whiteListMode": {
     "enable": true,
-    "whiteListIds": ["61558576796403",
+    "whiteListIds": ["61578240170502",
 "100089171565869",
       "100001018834621",
           "",
