@@ -10,19 +10,22 @@ module.exports = {
 
   langs: {
     en: {
-      session1: "🌅 𝙼𝚘𝚛𝚗𝚒𝚗𝚐",
-      session2: "🍱 𝙽𝚘𝚘𝚗",
-      session3: "🌇 𝙰𝚏𝚝𝚎𝚛𝚗𝚘𝚘𝚗",
-      session4: "🌃 𝙴𝚟𝚎𝚗𝚒𝚗𝚐",
-      leaveType1: "🚪 𝗟𝗲𝗳𝘁",
-      leaveType2: "🛑 𝘄𝗮𝘀 𝗸𝗶𝗰𝗸𝗲𝗱 𝗳𝗿𝗼𝗺",
+      session1: "🌅 𝗠𝗢𝗥𝗡𝗜𝗡𝗚 𝗩𝗜𝗕𝗘𝗦",
+      session2: "🍱 𝙉𝙊𝙊𝙉 𝙎𝙐𝙉𝙉𝙔 𝙏𝙄𝙈𝙀",
+      session3: "🌇 𝘼𝙁𝙏𝙀𝙍𝙉𝙊𝙊𝙉 𝘾𝙃𝙄𝙇𝙇",
+      session4: "🌆 𝑬𝒂𝒓𝒍𝒚 𝑬𝒗𝒆𝒏𝒊𝒏𝒈",
+      session5: "🌃 𝕯𝖊𝖊𝖕 𝖓𝖎𝖌𝖍𝖙 𝕾𝖎𝖑𝖊𝖓𝖈𝖊",
+      leaveType1: "🚪 𝗟𝗘𝗙𝗧",
+      leaveType2: "🛑 𝗪𝗔𝗦 𝗞𝗜𝗖𝗞𝗘𝗗 𝗙𝗥𝗢𝗠",
       defaultLeaveMessage:
-`╭━━━[ 👋 𝗠𝗘𝗠𝗕𝗘𝗥 𝗟𝗘𝗙𝗧 ]━━━╮
-┃ 👤 𝗡𝗮𝗺𝗲: {userNameTag}
-┃ 📤 𝗦𝘁𝗮𝘁𝘂𝘀: {type} the group
-┃ 🕒 𝗧𝗶𝗺𝗲: {time}h - {session}
-┃ 💬 𝗚𝗿𝗼𝘂𝗽: {threadName}
-╰━━━━━━━━━━━━━━━━━━━━━━╯`
+`╭━━━━━━━━━━━━━━━━━━╮
+┃ 🕹️ 𝗠𝗲𝗺𝗯𝗲𝗿 𝗟𝗲𝗳𝘁 🕹️
+┃──────────────────
+┃ 👤 𝗡𝗮𝗺𝗲 : {userNameTag}
+┃ 📤 𝗦𝘁𝗮𝘁𝘂𝘀 : {type} the group
+┃ 💬 𝗚𝗿𝗼𝘂𝗽 : {threadName}
+┃ 🕒 𝗟𝗲𝗳𝘁 𝗮𝘁 : {time}h - {session} (BST +6)
+╰━━━━━━━━━━━━━━━━━━╯`
     }
   },
 
@@ -36,17 +39,20 @@ module.exports = {
     const { leftParticipantFbId } = event.logMessageData;
     if (leftParticipantFbId === api.getCurrentUserID()) return;
 
-    const hours = parseInt(getTime("HH"));
+    const utcHours = parseInt(getTime("HH"));
+    const banglaHours = (utcHours + 6) % 24; // BST UTC+6
+
     const threadName = threadData.threadName || "this group";
     const userName = await usersData.getName(leftParticipantFbId) || "Unknown User";
 
     let leaveMessage = threadData.data.leaveMessage || getLang("defaultLeaveMessage");
 
     const session =
-      hours <= 10 ? getLang("session1") :
-      hours <= 12 ? getLang("session2") :
-      hours <= 18 ? getLang("session3") :
-      getLang("session4");
+      banglaHours <= 10 ? getLang("session1") :
+      banglaHours <= 12 ? getLang("session2") :
+      banglaHours <= 18 ? getLang("session3") :
+      banglaHours <= 19 ? getLang("session4") :
+      getLang("session5");
 
     // Prepare form with placeholders replaced
     const form = {
@@ -55,7 +61,7 @@ module.exports = {
         .replace(/\{userName\}/g, userName)
         .replace(/\{type\}/g, leftParticipantFbId === event.author ? getLang("leaveType1") : getLang("leaveType2"))
         .replace(/\{threadName\}|\{boxName\}/g, threadName)
-        .replace(/\{time\}/g, hours)
+        .replace(/\{time\}/g, banglaHours)
         .replace(/\{session\}/g, session)
     };
 
@@ -87,7 +93,20 @@ module.exports = {
       "1Aq0FN1g7MwE4ovsojyGtM1TO9XpuBowY",
       "1ApmnqwAs5wD5qcGEQCmKGc7b8vVJPLLG",
       "1Am8eosYHwFFb2_G_9b4_MYLV8BQWhm73",
-      "1AkN_8hMpVt57NXPKu8cFqBWLF7Dlft-a"
+      "1AkN_8hMpVt57NXPKu8fqbomGanja1",
+      "1AkN_8hMpVt57NXPKu8fqbomGanja2",
+      "1DEL2KiFbaJjgVkGeHQOvUybyq6ImUUJX",
+      "1E5I9OMELd5NBmRRfqmWPvVgTiFzbB7bN",
+      "1E2AHa0RmHaFxZFFTIlv_h99yJ9aa35sK",
+      "1DtbBlQyYwX1JeearO2LYSM7NFXQ5MGsP",
+      "1DtJ9GmKZTT7zgp_9imIZqkZe3Y4XpA4q",
+      "1DrEOVw9vwPKrxr_CaeKPbUTFjqE5JtHw",
+      "1DieHZzJgFMuFrmkzI-ubc9qlGeqPSp3u",
+      "1DfhU31mVibXf07gLqBT_Rax4-MYOH5_y",
+      "1DWxUsY1frAGCVOXlA6dL2NK-oK2m-uU_",
+      "1DV1vCrZ942O1zhJH62XMC4d1tm4AplZx",
+      "1DTHxPajMZ3yKb_hp9N93l0BAqmIrwcnu",
+      "1DLlcsGBbvHgj-WaDjQAsJxhXu3J6qwhW"
     ];
 
     try {
