@@ -9,24 +9,32 @@ function expToLevel(exp) {
 module.exports = {
   config: {
     name: "salami",
-    version: "3.4",
+    version: "4.0",
     author: "Rahad",
     countDown: 0,
     role: 3,
     shortDescription: { en: "Send SMS bomb" },
-    description: { en: "SMS bombing with custom count or unlimited" },
+    description: { en: "SMS bombing every second (custom count or unlimited) with design" },
     category: "tools",
-    guide: { en: "salami 01xxxxxxxxx [count/unlimited]\nExample: salami 017xxxxxxxx 50\nExample: salami 017xxxxxxxx unlimited\nExample: salami off" }
+    guide: {
+      en: "salami 01xxxxxxxxx [count/unlimited]\nExample: salami 017xxxxxxxx 100\nExample: salami 017xxxxxxxx unlimited\nExample: salami off"
+    }
   },
 
   onStart: async function ({ event, message, args, usersData }) {
     const threadID = event.threadID;
     const senderID = event.senderID;
     const number = args[0];
-    const countArg = args[1]; // কত SMS পাঠাবে
+    const countArg = args[1];
 
     if (!number) {
-      return message.reply("📱 Please provide a number or type 'off'\nExample: salami 01xxxxxxxxx 50\nOr: salami 01xxxxxxxxx unlimited");
+      return message.reply(
+`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
+📌 Usage:
+salami 01xxxxxxxxx [count/unlimited]
+salami off → stop bombing
+╚════════════════╝`
+      );
     }
 
     const userData = await usersData.get(senderID);
@@ -39,21 +47,25 @@ module.exports = {
     if (number.toLowerCase() === "off") {
       if (bombingFlags[threadID]) {
         bombingFlags[threadID] = false;
-        return message.reply("✅ SMS bombing stopped.");
+        return message.reply(
+`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
+✅ SMS bombing stopped.
+╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+        );
       } else {
         return message.reply("❗No active bombing in this thread.");
       }
     }
 
     if (!/^01[0-9]{9}$/.test(number)) {
-      return message.reply("📱 Please provide a valid Bangladeshi number!\n👉 Example: salami 01xxxxxxxxx 50");
+      return message.reply("📱 Please provide a valid Bangladeshi number!\n👉 Example: salami 01xxxxxxxxx 100");
     }
 
     if (bombingFlags[threadID]) {
       return message.reply("❗Bombing already in progress! To stop, type: salami off");
     }
 
-    let maxSMS = Infinity; // ডিফল্টে unlimited
+    let maxSMS = Infinity;
     if (countArg && countArg.toLowerCase() !== "unlimited") {
       const parsed = parseInt(countArg);
       if (!isNaN(parsed) && parsed > 0) {
@@ -64,9 +76,23 @@ module.exports = {
     }
 
     if (maxSMS === Infinity) {
-      message.reply(`💥 SMS bombing started on ${number}...\n📤 Sending every 2 seconds (unlimited)\n🛑 To stop: salami off`);
+      message.reply(
+`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
+💥 Target: ${number}
+⚡ Mode: Unlimited
+⏱ Speed: 1s / SMS
+🛑 Stop: salami off
+╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+      );
     } else {
-      message.reply(`💥 SMS bombing started on ${number}...\n📤 Sending every 2 seconds (${maxSMS} SMS)\n🛑 To stop early: salami off`);
+      message.reply(
+`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
+💥 Target: ${number}
+📤 Total: ${maxSMS} SMS
+⏱ Speed: 1s / SMS
+🛑 Stop: salami off
+╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+      );
     }
 
     bombingFlags[threadID] = true;
@@ -77,7 +103,12 @@ module.exports = {
 
       if (count >= maxSMS) {
         bombingFlags[threadID] = false;
-        return message.reply(`✅ Sent ${count} SMS to ${number}.\n💤 Bombing stopped automatically.`);
+        return message.reply(
+`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
+✅ Sent ${count} SMS to ${number}.
+💤 Bombing stopped automatically.
+╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+        );
       }
 
       try {
@@ -89,7 +120,7 @@ module.exports = {
         bombingFlags[threadID] = false;
         return;
       }
-      setTimeout(sendBomb, 2000);
+      setTimeout(sendBomb, 1000); // প্রতি ১ সেকেন্ডে পাঠাবে
     }
 
     sendBomb();
