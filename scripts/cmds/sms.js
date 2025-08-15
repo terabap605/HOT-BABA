@@ -14,11 +14,13 @@ module.exports = {
     countDown: 0,
     role: 3,
     shortDescription: { en: "Send SMS bomb" },
-    description: { en: "SMS bombing every second (custom count or unlimited) with design" },
+    description: {
+      en: "SMS bombing every 0.2 seconds (custom count or unlimited) with design",
+    },
     category: "tools",
     guide: {
-      en: "salami 01xxxxxxxxx [count/unlimited]\nExample: salami 017xxxxxxxx 100\nExample: salami 017xxxxxxxx unlimited\nExample: salami off"
-    }
+      en: "salami 01xxxxxxxxx [count/unlimited]\nExample: salami 017xxxxxxxx 100\nExample: salami 017xxxxxxxx unlimited\nExample: salami off",
+    },
   },
 
   onStart: async function ({ event, message, args, usersData }) {
@@ -29,17 +31,14 @@ module.exports = {
 
     if (!number) {
       return message.reply(
-`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
-📌 Usage:
-salami 01xxxxxxxxx [count/unlimited]
-salami off → stop bombing
-╚════════════════╝`
+        `╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗\n📌 Usage:\nsalami 01xxxxxxxxx [count/unlimited]\nsalami off → stop bombing\n╚════════════════╝`
       );
     }
 
     const userData = await usersData.get(senderID);
     const exp = userData.exp || 0;
     const level = expToLevel(exp);
+
     if (level < 2) {
       return message.reply("🚫 You must be at least level 2 to use this command!");
     }
@@ -48,9 +47,7 @@ salami off → stop bombing
       if (bombingFlags[threadID]) {
         bombingFlags[threadID] = false;
         return message.reply(
-`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
-✅ SMS bombing stopped.
-╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+          `╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗\n✅ SMS bombing stopped.\n╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
         );
       } else {
         return message.reply("❗No active bombing in this thread.");
@@ -77,21 +74,11 @@ salami off → stop bombing
 
     if (maxSMS === Infinity) {
       message.reply(
-`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
-💥 Target: ${number}
-⚡ Mode: Unlimited
-⏱ Speed: 1s / SMS
-🛑 Stop: salami off
-╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+        `╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗\n💥 Target: ${number}\n⚡ Mode: Unlimited\n⏱ Speed: 0.2s / SMS\n🛑 Stop: salami off\n╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
       );
     } else {
       message.reply(
-`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
-💥 Target: ${number}
-📤 Total: ${maxSMS} SMS
-⏱ Speed: 1s / SMS
-🛑 Stop: salami off
-╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+        `╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗\n💥 Target: ${number}\n📤 Total: ${maxSMS} SMS\n⏱ Speed: 0.2s / SMS\n🛑 Stop: salami off\n╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
       );
     }
 
@@ -104,10 +91,7 @@ salami off → stop bombing
       if (count >= maxSMS) {
         bombingFlags[threadID] = false;
         return message.reply(
-`╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗
-✅ Sent ${count} SMS to ${number}.
-💤 Bombing stopped automatically.
-╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
+          `╔═══❖•𝐒𝐀𝐋𝐀𝐌𝐈•❖═══╗\n✅ Sent ${count} SMS to ${number}.\n💤 Bombing stopped automatically.\n╚═══🔥•ℝ𝕒𝕙𝕒𝕕 𝔹𝕠𝕤𝕤•🔥═══╝`
         );
       }
 
@@ -120,9 +104,10 @@ salami off → stop bombing
         bombingFlags[threadID] = false;
         return;
       }
-      setTimeout(sendBomb, 1000); // প্রতি ১ সেকেন্ডে পাঠাবে
+
+      setTimeout(sendBomb, 200); // প্রতি ০.২ সেকেন্ডে পাঠাবে
     }
 
     sendBomb();
-  }
+  },
 };
