@@ -1,52 +1,35 @@
-const axios = require("axios")
+const axios = require("axios");
+
 module.exports = {
   config: {
     name: "movie",
     version: "1.1",
-    author: "nahim",
+    author: "Rahad Boss",
     countDown: 5,
     role: 0,
-    shortDescription: {
-      vi: "",
-      en: ""
-    },
-    longDescription: {
-      vi: "",
-      en: ""
-    },
-    category: "information",
-    guide:  {
-      vi: "{pn} movie name",
-      en: "{pn} movie name"
-    }
-
+    shortDescription: "Movie info + poster (Stylish)",
+    category: "entertainment",
+    guide: "{p}movie <movie name>"
   },
+  onStart: async function ({ message, args }) {
+    if (!args[0]) return message.reply("🎬 Please provide a movie name!");
 
-onStart: async function ({ event, message, getLang, usersData, api, args}) {
+    const movieName = encodeURIComponent(args.join(" "));
+    const apiKey = "YOUR_OMDB_API_KEY"; // এখানে তোমার OMDb API Key বসাও
 
-  let query = args.join(" ")
-  if(!query) return message.reply("Bigay mo ang title ng movie")
-  try{
-  let res = await axios.get(`https://api.popcat.xyz/imdb?q=${encodeURIComponent(query)}`)
+    try {
+      const res = await axios.get(`https://www.omdbapi.com/?t=${movieName}&apikey=${apiKey}`);
+      if (res.data.Response === "False") return message.reply("❌ Movie not found!");
 
-      let title = res.data.title,
-        date = res.data.year,
-        time = res.data.runtime,
-        genres = res.data.genres,
-        director = res.data.director,
-        actors = res.data.actors,
-        plot = res.data.plot
-      var poster = res.data.poster;
-     // console.log(res)
-        message.reply(
-        {
-          body: `Title: ${title}\\Actors: ${actors}\\Release Date: ${date}\\Genres: ${genres}\\Director: ${director}\\Plot: ${plot}`,
-          attachment: await global.utils.getStreamFromURL(poster)})
-  } catch(e){
-    console.log(e)
-    message.reply("Sorry wala akong nakuha na ganyan")
+      const m = res.data;
+      const bodyMsg = `💖 Bby Movie Search 💖\n━━━━━━━━━━━━━━━━\n🎬 ${m.Title} (${m.Year})\n⭐ IMDb: ${m.imdbRating}\n📜 Plot: ${m.Plot}\n🎭 Genre: ${m.Genre}\n📅 Released: ${m.Released}\n━━━━━━━━━━━━━━━━\n✨ Rahad Boss ✨`;
+
+      message.reply({
+        body: bodyMsg,
+        attachment: await global.utils.getStreamFromURL(m.Poster)
+      });
+    } catch (err) {
+      message.reply("⚠️ Error fetching movie data!");
+    }
   }
-
-
-}
-}
+};
