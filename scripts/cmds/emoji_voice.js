@@ -3,64 +3,44 @@ const request = require("request");
 
 const emojiAudioMap = {
   "🥺": {
-    url: "https://drive.google.com/uc?export=download&id=1Gyi-zGUv5Yctk5eJRYcqMD2sbgrS_c1R",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     caption: "মিস ইউ বেপি...🥺"
   },
   "😍": {
-    url: "https://drive.google.com/uc?export=download&id=1lIsUIvmH1GFnI-Uz-2WSy8-5u69yQ0By",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     caption: "তোমার প্রতি ভালোবাসা দিনকে দিন বাড়ছে... 😍"
   },
   "😭": {
-    url: "https://drive.google.com/uc?export=download&id=1qU27pXIm5MV1uTyJVEVslrfLP4odHwsa",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
     caption: "জান তুমি কান্না করতেছো কোনো... 😭"
   },
-  "😡": {
-    url: "https://drive.google.com/uc?export=download&id=1S_I7b3_f4Eb8znzm10vWn99Y7XHaSPYa",
-    caption: "রাগ কমাও, মাফ করাই বড়ত্ব... 😡"
-  },
-  "🙄": {
-    url: "https://drive.google.com/uc?export=download&id=1gtovrHXVmQHyhK2I9F8d2Xbu7nKAa5GD",
-    caption: "এভাবে তাকিও না তুমি ভেবে লজ্জা লাগে ... 🙄"
-  },
-  "😑": {
-    url: "https://drive.google.com/uc?export=download&id=1azElOD2QeaMbV2OdCY_W3tErD8JQ3T7P",
-    caption: "লেবু খাও জান সব ঠিক হয়ে যাবে 😑"
-  },
-  "😒": {
-    url: "https://drive.google.com/uc?export=download&id=1tbKe8yiU0RbINPlQgOwnig7KPXPDzjXv",
-    caption: "বিরক্ত করো না জান... ❤️"
-  },
-  "🤣": {
-    url: "https://drive.google.com/uc?export=download&id=1Hvy_Xee8dAYp-Nul7iZtAq-xQt6-rNpU",
-    caption: "হাসলে তোমাকে পাগল এর মতো লাগে... 🤣"
-  },
   "💔": {
-    url: "https://drive.google.com/uc?export=download&id=1jQDnFc5MyxRFg_7PsZXCVJisIIqTI8ZY",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
     caption: "feel this song... 💔"
   },
   "🙂": {
-    url: "https://drive.google.com/uc?export=download&id=1-Pdww0LPRMvLhgmL_C4HWHfT320Bp8-v",
+    url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
     caption: "আবাল ... 🙂"
   }
 };
 
 module.exports.config = {
   name: "emoji_voice",
-  version: "2.0.1",
+  version: "2.0.2",
   hasPermssion: 0,
-  credits: "Islamick Chat Modified by Cyber-Sujon",
-  description: "10 emoji = 10 voice response",
+  credits: "Islamick Chat Modified by Cyber-Sujon (Fixed by ChatGPT)",
+  description: "Emoji দিলে voice response দিবে",
   commandCategory: "noprefix",
-  usages: "🥺 😍 😭 etc.",
+  usages: "🥺 😍 😭 💔 🙂",
   cooldowns: 5
 };
 
-// ✅ onStart function for Goat Bot V2
+// ✅ Cache folder create
 module.exports.onStart = async () => {
   const cacheDir = __dirname + "/cache";
   if (!fs.existsSync(cacheDir)) {
     fs.mkdirSync(cacheDir, { recursive: true });
-    console.log("[emoji_voice] Cache folder created successfully!");
+    console.log("[emoji_voice] Cache folder created!");
   }
 };
 
@@ -71,19 +51,32 @@ module.exports.handleEvent = async ({ api, event }) => {
 
     const emoji = body.trim();
     const audioData = emojiAudioMap[emoji];
-    if (!audioData) return;
+
+    if (!audioData) {
+      console.log(`[emoji_voice] No match for: ${emoji}`);
+      return;
+    }
 
     const filePath = `${__dirname}/cache/${encodeURIComponent(emoji)}.mp3`;
+    console.log(`[emoji_voice] Matched emoji: ${emoji}`);
+    console.log(`[emoji_voice] Downloading: ${audioData.url}`);
 
     const callback = () => {
+      console.log(`[emoji_voice] Sending audio: ${filePath}`);
       api.sendMessage({
         body: `╭•┄┅════❁🌺❁════┅┄•╮\n\n${audioData.caption}\n\n╰•┄┅════❁🌺❁════┅┄•╯`,
         attachment: fs.createReadStream(filePath)
-      }, threadID, () => fs.unlinkSync(filePath), messageID);
+      }, threadID, () => {
+        fs.unlinkSync(filePath);
+        console.log(`[emoji_voice] Deleted cache: ${filePath}`);
+      }, messageID);
     };
 
-    const stream = request(encodeURI(audioData.url));
-    stream.pipe(fs.createWriteStream(filePath)).on("close", () => callback());
+    request(audioData.url)
+      .pipe(fs.createWriteStream(filePath))
+      .on("close", () => callback())
+      .on("error", (err) => console.error("[emoji_voice] Download error:", err));
+
   } catch (error) {
     console.error("Emoji Voice Error:", error);
   }
