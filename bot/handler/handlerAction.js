@@ -25,9 +25,8 @@ module.exports = (api, threadModel, userModel, dashBoardModel, globalModel, user
 			onReply, onEvent, handlerEvent, onReaction,
 			typ, presence, read_receipt
 		} = handlerChat;
-
+		
 		onAnyEvent();
-
 		switch (event.type) {
 			case "message":
 			case "message_reply":
@@ -37,44 +36,41 @@ module.exports = (api, threadModel, userModel, dashBoardModel, globalModel, user
 				onStart();
 				onReply();
 				break;
-
 			case "event":
 				handlerEvent();
 				onEvent();
 				break;
-
 			case "message_reaction":
-				try {
-					// If someone reacts with 😾 and it's not the bot reacting to itself
-					if (event.reaction === "😾" && event.messageID && event.userID !== api.getCurrentUserID()) {
-						// Check if the reacted message was sent by the bot
-						api.getThreadHistory(event.threadID, 1, undefined, event.messageID, (err, history) => {
-							if (err || !history || history.length === 0) return;
-
-							const msg = history[0];
-							if (msg.senderID == api.getCurrentUserID()) {
-								api.unsendMessage(event.messageID);
-							}
-						});
-					}
-				} catch (e) {
-					console.log("😾 Unsend error:", e.message);
-				}
 				onReaction();
+				
+				if (event.reaction == "🦵") {
+                  api.removeUserFromGroup(event.senderID, event.threadID, (err) => {
+                      if (err) return console.log(err);
+                    });
+                  }
+                
+                if (event.reaction == "🤬") {
+                  if (event.senderID == global.botID) {
+                    message.unsend(event.messageID);
+                    }
+                  }
 				break;
-
 			case "typ":
 				typ();
 				break;
-
 			case "presence":
 				presence();
 				break;
-
 			case "read_receipt":
 				read_receipt();
 				break;
+			// case "friend_request_received":
+			// { /* code block */ }
+			// break;
 
+			// case "friend_request_cancel"
+			// { /* code block */ }
+			// break;
 			default:
 				break;
 		}
