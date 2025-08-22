@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled SMS Sender</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
+        body {
+            background-color: #000;
+            color: #0000ff;
+            font-family: 'Nosifer', cursive;
+            text-align: center;
+            padding: 50px 0;
+            margin: 0;
+            position: relative;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 2px solid #0000ff;
+            padding: 30px;
+            background: #1a1a1a;
+            box-shadow: 0 0 15px #0000ff;
+            position: relative;
+            z-index: 1;
+        }
+        h2 {
+            font-size: 3em;
+            color: #0000ff;
+            text-shadow: 2px 2px 10px #0000ff;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="datetime-local"],
+        button {
+            padding: 15px;
+            font-size: 1.2em;
+            margin: 10px 0;
+            border: 1px solid #0000ff;
+            background: #333;
+            color: #0000ff;
+            box-shadow: 0 0 5px #0000ff;
+            width: 90%;
+        }
+        button {
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .logo {
+            background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR45jXKfjRKIzk7ZIXM34RziYcm-cz5AX_mRB2Konb2YvpNiEtJUmR8y5w&s=10') no-repeat center center;
+            background-size: cover;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            margin: 0 auto;
+            animation: rotate 10s linear infinite, horror 2s infinite alternate;
+            transition: transform 0.5s, box-shadow 0.5s;
+        }
+        .logo:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 0 30px #0000ff;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes horror {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo"></div>
+        <h2>Scheduled SMS Sender</h2>
+        <form id="smsForm">
+            <div class="form-group">
+                <label for="scheduleDateTime">Scheduled Start Date & Time</label>
+                <input type="datetime-local" id="scheduleDateTime" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" id="phoneNumber" placeholder="Enter phone number" required>
+            </div>
+            <button type="submit">Start SMS Schedule</button>
+        </form>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const API_URL = "https://bkshopthc.grameenphone.com/api/v1/fwa/request-for-otp";
+        const smsForm = document.getElementById('smsForm');
+        const statusText = document.getElementById('status');
+        let intervalId;
+
+        smsForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const dateTimeInput = document.getElementById('scheduleDateTime').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const scheduleTime = new Date(dateTimeInput).getTime();
+            const endTime = scheduleTime + (7 * 24 * 60 * 60 * 1000); // 7 days in milliseconds
+
+            if (!scheduleTime || !phoneNumber) {
+                alert('Please enter a valid date, time, and phone number.');
+                return;
+            }
+
+            const sendRequest = () => {
+                const data = {
+                    phone: phoneNumber,
+                    email: "", // Placeholder as per API requirement
+                    language: "en"
+                };
+                fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': 'Mozilla/5.0'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    statusText.innerText = `Response: ${JSON.stringify(data)}`;
+                })
+                .catch(error => {
+                    statusText.innerText = `Error: ${error}`;
+                });
+            };
+
+            const checkAndSendSMS = () => {
+                const currentTime = new Date().getTime();
+                if (currentTime >= scheduleTime && currentTime <= endTime) {
+                    sendRequest();
+                } else if (currentTime > endTime) {
+                    clearInterval(intervalId);
+                    statusText.innerText = 'SMS sending completed after 7 days.';
+                } else {
+                    statusText.innerText = 'Waiting for scheduled time...';
+                }
+            };
+
+            intervalId = setInterval(checkAndSendSMS, 10000);
+            statusText.innerText = 'SMS schedule initiated...';
+        });
+
+        window.addEventListener('unload', () => {
+            clearInterval(intervalId);
+        });
+    </script>
+</body>
+</html>
