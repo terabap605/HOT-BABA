@@ -6,7 +6,7 @@ module.exports = {
   config: {
     name: "gf",
     aliases: ["couple"],
-    version: "3.0",
+    version: "3.2",
     author: "Rahad",
     countDown: 5,
     role: 0,
@@ -20,38 +20,43 @@ module.exports = {
     try {
       let id1 = event.senderID;
       let id2 = Object.keys(event.mentions)[0];
-      if (!id2) return api.sendMessage("❌ | Please mention someone!", event.threadID, event.messageID);
+      if (!id2) 
+        return api.sendMessage("❌ | কাউকে mention করো!", event.threadID, event.messageID);
 
-      // Avatars
-      const avatar1 = await Canvas.loadImage(`https://graph.facebook.com/${id1}/picture?height=512&width=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`);
-      const avatar2 = await Canvas.loadImage(`https://graph.facebook.com/${id2}/picture?height=512&width=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`);
+      // Load avatars
+      const avatar1 = await Canvas.loadImage(
+        `https://graph.facebook.com/${id1}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`
+      );
+      const avatar2 = await Canvas.loadImage(
+        `https://graph.facebook.com/${id2}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`
+      );
 
-      // Background (template)
+      // Load background
       const background = await Canvas.loadImage("https://i.imgur.com/iaOiAXe.jpeg");
 
-      // Canvas same as template
+      // Create canvas
       const canvas = Canvas.createCanvas(background.width, background.height);
       const ctx = canvas.getContext("2d");
 
       // Draw background
       ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-      // === Place avatar1 on left circle ===
+      // === Avatar 1 (left, 200x200) ===
       ctx.save();
       ctx.beginPath();
-      ctx.arc(260, 350, 120, 0, Math.PI * 2, true); // (x, y, radius)
+      ctx.arc(70 + 100, 110 + 100, 100, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.clip();
-      ctx.drawImage(avatar1, 140, 230, 240, 240);   // (x, y, width, height)
+      ctx.drawImage(avatar1, 70, 110, 200, 200);
       ctx.restore();
 
-      // === Place avatar2 on right circle ===
+      // === Avatar 2 (right, 200x200) ===
       ctx.save();
       ctx.beginPath();
-      ctx.arc(620, 350, 120, 0, Math.PI * 2, true);
+      ctx.arc(465 + 100, 110 + 100, 100, 0, Math.PI * 2, true);
       ctx.closePath();
       ctx.clip();
-      ctx.drawImage(avatar2, 500, 230, 240, 240);
+      ctx.drawImage(avatar2, 465, 110, 200, 200);
       ctx.restore();
 
       // Save
@@ -62,7 +67,19 @@ module.exports = {
       out.on("finish", () => {
         api.sendMessage(
           {
-            body: `💞 Couple edit complete!`,
+            body: `⚡⪼━━━━━━━━━━━━━━⪻⚡
+
+🌌 𝑪𝒚𝒃𝒆𝒓 𝑳𝒐𝒗𝒆 𝑨𝒄𝒕𝒊𝒗𝒆 🌌
+
+💞 ━━━━『সফল জুটি তৈরি হয়েছে』━━━━ 💞
+
+👾 এখন থেকে তোমরা অফিশিয়ালি  
+         ❝ 𝑪𝒐𝒖𝒑𝒍𝒆 𝑴𝒐𝒅𝒆 ❞ এ 🖤
+
+🌐 ভালোবাসা যেন অফলাইনে না যায়,  
+        সব সময় অনলাইনে রেখো 💫
+
+⚡⪼━━━━━━━━━━━━━━⪻⚡`,
             attachment: fs.createReadStream(path)
           },
           event.threadID,
@@ -72,7 +89,7 @@ module.exports = {
       });
     } catch (err) {
       console.log(err);
-      api.sendMessage("❌ | Something went wrong!", event.threadID, event.messageID);
+      api.sendMessage("❌ | কিছু ভুল হয়েছে!", event.threadID, event.messageID);
     }
   }
 };
