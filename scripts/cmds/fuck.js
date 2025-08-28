@@ -6,8 +6,8 @@ const path = require("path");
 module.exports = {
   config: {
     name: "fuck",
-    aliases: ["chuda", "chod"],
-    version: "1.0.5",
+    aliases: ["chod", "choda"],
+    version: "1.0.6",
     author: "RAHAD",
     countDown: 5,
     role: 0,
@@ -56,7 +56,7 @@ module.exports = {
         `https://graph.facebook.com/${id2}/picture?width=512&height=512&access_token=6628568379%7Cc1e620fa708a1d5696fb991c1bde5662`
       );
 
-      // Draw avatars with **same size and positions as fuck.js**
+      // Avatar positions (same as fuck.js style)
       const left = { x: 190, y: 200, size: 180 };
       const right = { x: 390, y: 200, size: 180 };
 
@@ -79,8 +79,13 @@ module.exports = {
       const stream = canvas.createPNGStream();
       stream.pipe(out);
       out.on("finish", () => {
+        const bodyMessage = `
+┏━❦━━━━━━━━❦━┓
+   ⚡ 𝑶𝒉𝒉 𝒀𝒂𝒂𝒉 💥😩 ⚡
+┗━❦━━━━━━━━❦━┛
+        `;
         api.sendMessage(
-          { body: "", attachment: fs.createReadStream(pathOut) },
+          { body: bodyMessage, attachment: fs.createReadStream(pathOut) },
           threadID,
           () => fs.unlinkSync(pathOut),
           messageID
