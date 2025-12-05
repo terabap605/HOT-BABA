@@ -13,16 +13,16 @@
   "checkApproval": true,
   "language": "en",
   "notesLanguage": "change to your language with ISO 639-1 code, available languages: vi (Vietnamese), en (English)",
-  "nickNameBot": "-`ღ´🦋𝗠𝗲𝗹𝗶𝘀𝗮🍒🥂",
-  "prefix": "+",
+  "nickNameBot": "BOT BABA",
+  "prefix": "#",
   "adminOnly": {
     "enable": false,
     "ignoreCommand": []
   },
   "adminBot": [
-    "61558576796403",
-    "100089171565869",
-    "100001018834621",
+    "61581502015227",
+    "",
+    "",
     "",
     "",
     "",
@@ -32,9 +32,9 @@
   "handlerReaction": {
     "enable": true,
     "HandelReactionMain": [
-      "61558576796403",
-    "100089171565869",
-    "100001018834621",
+    "61581502015227",
+    "",
+    "",
     "",
     "",
     "",
@@ -43,7 +43,7 @@
     "HandelReactionOthers": []
   },
   "whiteListMode": {
-    "enable": true,
+    "enable": false,
     "whiteListIds": ["61558576796403",
 "100089171565869",
       "100001018834621",
